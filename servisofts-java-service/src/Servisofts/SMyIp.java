@@ -23,16 +23,18 @@ public class SMyIp {
         return PUBLIC_IP;
 
     }
-
+    public static void main(String[] args) throws Exception {
+       String ip = getLocalHostLANAddress().getHostAddress();
+         System.out.println(ip);
+    }
     public static String getLocalIp() {
         InetAddress ip;
         try {
-            ip = InetAddress.getLocalHost();
+            return getLocalHostLANAddress().getHostAddress();
         } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return "";
+        return "127.0.0.1";
     }
 
 

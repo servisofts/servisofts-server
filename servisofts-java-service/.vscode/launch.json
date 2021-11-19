@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Launch SMyIp",
+            "request": "launch",
+            "mainClass": "Servisofts.SMyIp",
+            "projectName": "servisofts-java-service_7b73bb47"
+        },
+        {
+            "type": "java",
             "name": "Launch App",
             "request": "launch",
             "mainClass": "App",
