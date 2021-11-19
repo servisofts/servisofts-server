@@ -28,19 +28,19 @@ public class _servicio {
             SConsole.warning("Socket Client,", "servicio,", obj.getString("type"));
             switch (obj.getString("type")) {
             case "init":
-                init(obj);
+                init(obj, sesion);
                 break;
             case "initServer":
-                initServer(obj);
+                initServer(obj, sesion);
                 break;
             case "initClient":
-                initClient(obj);
+                initClient(obj, sesion);
                 break;
             case "getServicioHabilitado":
-                getServicioHabilitado(obj);
+                getServicioHabilitado(obj, sesion);
                 break;
             case "getEstadoServicio":
-                getEstadoServicio(obj);
+                getEstadoServicio(obj, sesion);
                 break;
             case "getPem":
                 getPem(obj);
@@ -50,7 +50,7 @@ public class _servicio {
         }
     }
 
-    private void getEstadoServicio(JSONObject obj) {
+    private void getEstadoServicio(JSONObject obj, SSSessionAbstract sesion) {
         JSONObject servicio = obj.getJSONObject("data");
         SSServerAbstract.getSession(obj.getString("id_session")).setServicio(servicio);
         obj.put("component", "servicio");
@@ -59,9 +59,11 @@ public class _servicio {
         obj.put("estado", "exito");
         obj.put("data", servicio);
         SSServerAbstract.getSession(obj.getString("id_session")).send(obj.toString());
+        SConsole.succes("SERVICIO Identificado", "\t|\t", obj.getString("id_session"), "\t|\t",
+                servicio.getString("nombre"));
     }
 
-    private void getServicioHabilitado(JSONObject obj) {
+    private void getServicioHabilitado(JSONObject obj, SSSessionAbstract sesion) {
         JSONArray data = obj.getJSONArray("data");
         SConsole.info("----SERVICIO HABILITADOS---------------------------");
         JSONObject serviciosH = new JSONObject();
@@ -80,12 +82,12 @@ public class _servicio {
         SConsole.info("---------------------------------------------------");
     }
 
-    private void initServer(JSONObject obj) {
+    private void initServer(JSONObject obj, SSSessionAbstract sesion) {
+
         if (obj.getString("estado").equals("exito")) {
             new ServerSocket(obj.getJSONObject("data").getInt("puerto"));
             new ServerSocketWeb(obj.getJSONObject("data").getInt("puerto_ws"));
             ServerHttp.Start(obj.getJSONObject("data").getInt("puerto_http"));
-
             JSONObject objSend = new JSONObject();
             objSend.put("component", "servicio");
             objSend.put("type", "getServicioHabilitado");
@@ -98,20 +100,24 @@ public class _servicio {
         }
     }
 
-    private void initClient(JSONObject obj) {
+    private void initClient(JSONObject obj, SSSessionAbstract sesion) {
+        if (sesion == null) {
+            SConsole.succes("SERVER INICIADOOOOOOO");
+            return;
+        }
+        SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());
         JSONObject data = obj.getJSONObject("data");
-        System.out.println(data.toString());
         JSONObject objSend = new JSONObject();
         objSend.put("component", "servicio");
         objSend.put("type", "getEstadoServicio");
         objSend.put("data", data);
-        objSend.put("id_session", obj.getString("id"));
+        objSend.put("id_session", sesion.getIdSession());
         objSend.put("estado", "cargando");
-        SocketCliente.send("servicio", objSend.toString());
+        SocketCliente.send("servicio", objSend, sesion);
         obj.put("noSend", true);
     }
 
-    private void init(JSONObject obj) {
+    private void init(JSONObject obj, SSSessionAbstract sesion) {
         JSONObject data = new JSONObject();
         data.put("cert", SConfig.getJSON("ssl").getJSONObject("cert"));
         data.put("ip", SMyIp.getLocalIp());
@@ -119,14 +125,20 @@ public class _servicio {
         String fingerp = SSL.getFingerPrint(SConfig.getJSON("ssl").getJSONObject("cert").getString("OU"));
         data.put("fingerp", fingerp);
         JSONObject objSend = new JSONObject();
-        if(obj.getString("socket").equals("servicio")){
+        if (obj.getString("socket").equals("servicio")) {
             objSend.put("component", "servicio");
             objSend.put("type", "initServer");
             objSend.put("data", data);
             objSend.put("estado", "cargando");
             SocketCliente.send("servicio", objSend.toString());
+        } else {
+            objSend.put("component", "servicio");
+            objSend.put("type", "initClient");
+            objSend.put("data", data);
+            objSend.put("estado", "cargando");
+            SocketCliente.send(obj.getString("socket"), objSend.toString());
         }
-        
+
     }
 
     private void getPem(JSONObject obj) {

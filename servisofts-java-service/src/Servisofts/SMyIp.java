@@ -24,19 +24,16 @@ public class SMyIp {
 
     }
 
-    public static String getLocalIp()throws UnknownHostException {
-        InetAddress ip = InetAddress.getLocalHost();
-        return ip.getHostAddress();
-    }
-
-
-     public static void main(String[] args) {
+    public static String getLocalIp() {
+        InetAddress ip;
         try {
-             System.out.println("Chaval aqui esta la IP Local: " + getLocalIp());
-        } catch (UnknownHostException ex) {
-            System.out.println("No se ha podido obtener la IP de su compu");
-        }        
-    }    
+            ip = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return "";
+    }
 
 
     private static InetAddress getLocalHostLANAddress() throws UnknownHostException {

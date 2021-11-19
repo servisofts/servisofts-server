@@ -1,5 +1,5 @@
 {
-    "ss": "servisofts.kolping",
+    "ss": "servisofts.usuario",
     "socket_client": {
         "servicio": {
             "puerto": 10001,
@@ -11,32 +11,34 @@
         },
         "reconectTime": 5000
     },
-    "files": {
-        "url": "/u01/servisoftsFiles/kolping/"
-    },
     "data_base": {
         "puerto": 5432,
-        "pass": "fullparts123.",
-        "ip": "192.168.0.10",
-        "bd_name": "servisofts.kolping",
+        "pg_restore": "C:\\Program Files\\PostgreSQL\\12\\bin\\pg_restore.exe",
+        "pass": "postgres",
+        "ip": "usuario.ss.lo",
+        "pg_dump": "C:\\Program Files\\PostgreSQL\\12\\bin\\pg_dump.exe",
+        "bd_name": "servisofts.usuario",
         "user": "postgres"
     },
-    "nombre": "kolping",
+    "files": {
+        "url": "D:\\u01\\"
+    },
+    "nombre": "usuario",
     "ssl": {
         "pass_jks": "Servisofts123.",
         "cert": {
             "ST": "Av Banzer",
             "C": "BO",
             "E": "ricky.paz.d.97@gmail.com",
-            "OU": "kolping",
-            "CN": "kolping.servisofts.com",
+            "OU": "usuario",
+            "CN": "usuario.servisofts.com",
             "L": "Santa Cruz",
             "O": "Servisofts SRL"
         },
         "nombre_jks": "servisofts"
     },
     "socket_server": {
-        "puerto": 10019,
+        "puerto": 10002,
         "ip": "192.168.0.3"
     }
 }

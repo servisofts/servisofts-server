@@ -1,5 +1,6 @@
 rm -fr bin
-rm App.jar
+path_dir=${PWD##*/}   
+rm "${path_dir}.jar"
 mkdir bin
 cd bin
 FILES="../lib/*"
@@ -18,9 +19,8 @@ echo "" >> META-INF/MANIFEST.MF
 echo "" >> META-INF/MANIFEST.MF
 cd ../
 javac -cp "src/:lib/*" src/App.java -d bin
-path_dir=${PWD##*/}   
 jar cfM "${path_dir}.jar" -C bin/ .
 rm -fr bin
-
 #Copy to USUARIO
-# cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/usuario/server/lib/
+cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/usuario/server/lib/
+cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/kolping/server/lib/
