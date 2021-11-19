@@ -134,7 +134,7 @@ public class SSL {
         try {
 
             KeyStore keyStore = getKeyStore();
-
+            keyStore.deleteEntry(nombre);
             keyStore.setCertificateEntry(nombre, cert);
             keyStore.store(new FileOutputStream(path), pass.toCharArray());
             SConsole.warning("New certificate SSL ( OU=" + nombre + " ) is register on the " + path + " JKS!");

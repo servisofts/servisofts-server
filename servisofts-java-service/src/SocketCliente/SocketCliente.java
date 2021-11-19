@@ -23,6 +23,8 @@ import component._servicio;
 
 import org.json.JSONObject;
 
+import Server.SSSAbstract.SSSessionAbstract;
+
 public class SocketCliente extends Thread {
 
     public static HashMap<String, SocketCliente> Clientes = new HashMap<>();
@@ -194,14 +196,12 @@ public class SocketCliente extends Thread {
         Clientes.get(server).response.flush();
     }
 
-    // public static void send(String server, JSONObject data, SSSessionAbstract
-    // session) {
-    // if(session!=null)
-    // data.put("router", session.getIdSession());
-
-    // Clientes.get(server).response.println(data);
-    // Clientes.get(server).response.flush();
-
-    // }
+    public static void send(String server, JSONObject data, SSSessionAbstract session) {
+        if (session != null) {
+            data.put("router", session.getIdSession());
+        }
+        Clientes.get(server).response.println(data);
+        Clientes.get(server).response.flush();
+    }
 
 }

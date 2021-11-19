@@ -1,5 +1,11 @@
 package component;
 
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -8,6 +14,7 @@ import Server.SSSAbstract.SSSessionAbstract;
 import Server.ServerSocket.ServerSocket;
 import Server.ServerSocketWeb.ServerSocketWeb;
 import ServerHttp.ServerHttp;
+import Servisofts.Regex;
 import Servisofts.SConfig;
 import Servisofts.SConsole;
 import Servisofts.SMyIp;
@@ -35,6 +42,10 @@ public class _servicio {
             case "getEstadoServicio":
                 getEstadoServicio(obj);
                 break;
+            case "getPem":
+                getPem(obj);
+                break;
+
             }
         }
     }
@@ -108,11 +119,31 @@ public class _servicio {
         String fingerp = SSL.getFingerPrint(SConfig.getJSON("ssl").getJSONObject("cert").getString("OU"));
         data.put("fingerp", fingerp);
         JSONObject objSend = new JSONObject();
-        objSend.put("component", "servicio");
-        objSend.put("type", "initServer");
-        objSend.put("data", data);
-        objSend.put("estado", "cargando");
-        SocketCliente.send("servicio", objSend.toString());
+        if(obj.getString("socket").equals("servicio")){
+            objSend.put("component", "servicio");
+            objSend.put("type", "initServer");
+            objSend.put("data", data);
+            objSend.put("estado", "cargando");
+            SocketCliente.send("servicio", objSend.toString());
+        }
+        
+    }
+
+    private void getPem(JSONObject obj) {
+        // System.out.println(obj.toString());
+
+        try {
+            String pem = obj.getString("data");
+            byte[] prvBlob = Base64.decode(pem);
+            X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509")
+                    .generateCertificate(new ByteArrayInputStream(prvBlob));
+            String nombre = Regex.findOU(cert.getSubjectX500Principal().getName());
+            SSL.registerPem(nombre, cert);
+            SocketCliente.servicios_habilitados.getJSONObject(nombre).put("pem", nombre + ".pem");
+        } catch (CertificateException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
 }
