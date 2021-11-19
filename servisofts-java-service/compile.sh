@@ -22,5 +22,5 @@ javac -cp "src/:lib/*" src/App.java -d bin
 jar cfM "${path_dir}.jar" -C bin/ .
 rm -fr bin
 #Copy to USUARIO
-cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/usuario/server/lib/
-cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/kolping/server/lib/
+#cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/usuario/server/lib/
+#cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/kolping/server/lib/
