@@ -4,9 +4,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
-
-import org.json.JSONObject;
-
 import Servisofts.SConsole;
 import Servisofts.SSL;
 import Server.SSSAbstract.SSServerAbstract;

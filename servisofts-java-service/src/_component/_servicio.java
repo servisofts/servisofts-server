@@ -25,7 +25,11 @@ import SocketCliente.SocketCliente;
 public class _servicio {
     public _servicio(JSONObject obj, SSSessionAbstract sesion) {
         if (!obj.isNull("type")) {
-            SConsole.warning("Socket Client,", "servicio,", obj.getString("type"));
+            if(sesion==null){
+                SConsole.warning("Socket Client,", " ( OU= "+obj.getJSONObject("info").getJSONObject("cert").getString("OU"),") servicio,", obj.getString("type"));
+            }else{
+                SConsole.warning("Socket Server,", "servicio,", obj.getString("type"));
+            }
             switch (obj.getString("type")) {
             case "init":
                 init(obj, sesion);
@@ -102,7 +106,7 @@ public class _servicio {
 
     private void initClient(JSONObject obj, SSSessionAbstract sesion) {
         if (sesion == null) {
-            SConsole.succes("SERVER INICIADOOOOOOO");
+            SConsole.succes("SERVER INICIADO:"+obj.getJSONObject("info").getJSONObject("cert").getString("OU"));
             return;
         }
         SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());

@@ -6,20 +6,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
-
 import org.json.JSONObject;
-
 import Server.MensajeSocket;
 import Server.SSSAbstract.SSSessionAbstract;
 import Servisofts.SConsole;
-import _component._Manejador;
 
 public class SessionSocket extends SSSessionAbstract {
 
@@ -50,15 +44,6 @@ public class SessionSocket extends SSSessionAbstract {
     public void onMessage(String mensaje) {
         JSONObject data = new JSONObject(mensaje);
         onMenssage(data);
-        // data.put("id", getIdSession());
-        // data.put("noSend", false);
-        // new Manejador(data, this);
-        // if (!data.getBoolean("noSend")) {
-        //     if (data.has("servicio")) {
-        //         data.remove("servicio");
-        //     }
-        //     send(data.toString());
-        // }
     }
 
     @Override
@@ -70,13 +55,11 @@ public class SessionSocket extends SSSessionAbstract {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     public void onError(JSONObject obj) {
         printLog("Error: " + obj.getString("error"));
-
     }
 
     @Override

@@ -156,6 +156,7 @@ public class SocketCliente extends Thread {
     private void onMesagge(String msg, JSONObject config) {
         try {
             JSONObject data = new JSONObject(msg);
+            data.put("info", config);
             switch (config.getJSONObject("cert").getString("OU")) {
             case "servicio":
                 switch (data.getString("component")) {

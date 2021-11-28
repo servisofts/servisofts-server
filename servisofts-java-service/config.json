@@ -1,0 +1,38 @@
+{
+    "ss": "servisofts.condominio",
+    "socket_client": {
+        "servicio": {
+            "puerto": 10001,
+            "ip": "servicio.ss.lo",
+            "cert": {
+                "OU": "servicio",
+                "pem": "servicio.pem"
+            }
+        },
+        "reconectTime": 10000
+    },
+    "files": {
+        "url": "/u01/servisoftsFiles/condominio/"
+    },
+    "data_base": {
+        "puerto": 5432,
+        "pass": "postgres",
+        "ip": "condominio.ss.lo",
+        "bd_name": "servisofts.condominio",
+        "user": "postgres"
+    },
+    "nombre": "condominio",
+    "ssl": {
+        "pass_jks": "Servisofts123.",
+        "cert": {
+            "ST": "Av Banzer",
+            "C": "BO",
+            "E": "ricky.paz.d.97@gmail.com",
+            "OU": "condominio",
+            "CN": "condominio.servisofts.com",
+            "L": "Santa Cruz",
+            "O": "Servisofts SRL"
+        },
+        "nombre_jks": "servisofts"
+    }
+}
