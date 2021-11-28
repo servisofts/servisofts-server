@@ -200,6 +200,10 @@ public class SocketCliente extends Thread {
         if (session != null) {
             data.put("id_session", session.getIdSession());
         }
+        if(Clientes.get(server)==null){
+            SConsole.error("Error: SocketCliente: send: No existe el cliente: "+server);
+            return;
+        }
         Clientes.get(server).response.println(data);
         Clientes.get(server).response.flush();
     }
