@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import Server.SSSInterface.SSSessionInterface;
 import Servisofts.SConfig;
-import component.Manejador;
+import _component._Manejador;
 
 public abstract class SSSessionAbstract implements SSSessionInterface {
 
@@ -64,7 +64,7 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
         if (this.servicio != null) {
             data.put("servicio",this.servicio);
         }
-        new Manejador(data, this);
+        new _Manejador(data, this);
         if (!data.getBoolean("noSend")) {
             send(data.toString());
         }

@@ -19,15 +19,22 @@ public class ServerHttp {
             org.eclipse.jetty.util.log.Log.getProperties().setProperty("org.eclipse.jetty.util.log.announce", "false");
             org.eclipse.jetty.util.log.Log.getRootLogger().setDebugEnabled(false);
             server = HttpServer.create(new InetSocketAddress(puerto), 0);
+
             HttpContext apiContext = server.createContext("/api");
             apiContext.setHandler(Api::POST);
+
+            HttpContext uploadContext = server.createContext("/upload");
+            uploadContext.setHandler(Upload::handleRequest);
+
+            HttpContext downloadContext = server.createContext("/");
+            downloadContext.setHandler(Download::handleRequest);
+
             server.start();
             SConsole.succes("HttpServer on port ( " + puerto + " ) is ready!");
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
 }

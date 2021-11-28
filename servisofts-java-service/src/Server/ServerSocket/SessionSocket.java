@@ -19,7 +19,7 @@ import org.json.JSONObject;
 import Server.MensajeSocket;
 import Server.SSSAbstract.SSSessionAbstract;
 import Servisofts.SConsole;
-import component.Manejador;
+import _component._Manejador;
 
 public class SessionSocket extends SSSessionAbstract {
 

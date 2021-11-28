@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import Server.SSSAbstract.SSServerAbstract;
 import Servisofts.SConsole;
 import Servisofts.Servisofts;
-import component._servicio;
+import _component._servicio;
 
 public class ManejadorCliente {
 

@@ -18,8 +18,7 @@ import Servisofts.SConsole;
 // import util.console;
 // import Config.Config;
 import Servisofts.SSL;
-// import Server.SSSAbstract.SSSessionAbstract;
-import component._servicio;
+import _component._servicio;
 
 import org.json.JSONObject;
 
