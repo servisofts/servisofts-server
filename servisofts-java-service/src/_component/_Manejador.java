@@ -22,13 +22,15 @@ public class _Manejador {
                     Servisofts.Manejador.apply(data, sesion);
                 }
                 if (data.has("service")) {
-                    SocketCliente.send(data.getString("service"), data, sesion);
+                    String service = data.getString("service");
+                    data.remove("service");
+                    SocketCliente.send(service, data, sesion);
                 }
             } else {
                 data.put("error", "No existe el componente");
             }
         }catch(Exception e){
-            SConsole.error("Error en el manejador de componentes: " + e.getMessage());
+            SConsole.error("Error en el manejador de componentes: " + e.getLocalizedMessage());
         }
     }
 }

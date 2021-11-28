@@ -1,35 +1,35 @@
 {
-    "ss": "servisofts.condominio",
+    "ss": "servisofts.roles_permisos",
     "socket_client": {
         "servicio": {
             "puerto": 10001,
-            "ip": "servicio.ss.lo",
+            "ip": "192.168.5.1",
             "cert": {
                 "OU": "servicio",
                 "pem": "servicio.pem"
             }
         },
-        "reconectTime": 10000
+        "reconectTime": 5000
     },
-    "files": {
-        "url": "/u01/servisoftsFiles/condominio/"
+    "files":{
+        "url":"/u01/servisoftsFiles/roles_permisos/"
     },
     "data_base": {
         "puerto": 5432,
         "pass": "postgres",
-        "ip": "condominio.ss.lo",
-        "bd_name": "servisofts.condominio",
+        "ip": "192.168.5.16",
+        "bd_name": "servisofts.roles_permisos",
         "user": "postgres"
     },
-    "nombre": "condominio",
+    "nombre": "roles_permisos",
     "ssl": {
         "pass_jks": "Servisofts123.",
         "cert": {
             "ST": "Av Banzer",
             "C": "BO",
             "E": "ricky.paz.d.97@gmail.com",
-            "OU": "condominio",
-            "CN": "condominio.servisofts.com",
+            "OU": "roles_permisos",
+            "CN": "roles_permisos.servisofts.com",
             "L": "Santa Cruz",
             "O": "Servisofts SRL"
         },
