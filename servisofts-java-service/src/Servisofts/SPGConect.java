@@ -140,6 +140,9 @@ public class SPGConect {
                     case "integer":
                         aux += tupla.getString("column_name") + "=" + obj.getInt(tupla.getString("column_name")) + ",";
                         break;
+                    case "json":
+                        aux += tupla.getString("column_name") + "='" + obj.get(tupla.getString("column_name")).toString() + "',";
+                        break;
                     default:
                         aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
                                 + "',";
