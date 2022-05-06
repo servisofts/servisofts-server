@@ -137,7 +137,7 @@ public class SSL {
             keyStore.deleteEntry(nombre);
             keyStore.setCertificateEntry(nombre, cert);
             keyStore.store(new FileOutputStream(path), pass.toCharArray());
-            SConsole.warning("New certificate SSL ( OU=" + nombre + " ) is register on the " + path + " JKS!");
+            // SConsole.warning("New certificate SSL ( OU=" + nombre + " ) is register on the " + path + " JKS!");
             return true;
         } catch (Exception e) {
             return false;
@@ -391,7 +391,7 @@ public class SSL {
             // byte[] bpemCert = Files.readAllBytes(file.toPath());
             // certSConfig.put("cert", new String(Base64.encode(bpemCert)));
             // new Email(certConfig).start();
-            SConsole.warning("New certificate SSL ( OU=" + certSConfig.getString("OU") + " ) generated!");
+            // SConsole.warning("New certificate SSL ( OU=" + certSConfig.getString("OU") + " ) generated!");
             getPKey(keyPair, certSConfig.getString("OU"));
             return true;
         } catch (CertificateEncodingException | InvalidKeyException | IllegalStateException | NoSuchProviderException

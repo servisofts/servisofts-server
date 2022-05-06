@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONArray;
@@ -23,38 +25,49 @@ import SocketCliente.SocketCliente;
 // import SocketServer.SocketServer;
 
 public class _servicio {
+
+    // public static HashMap<String, SSSessionAbstract> services_sessions = new
+    // HashMap<>();
+
     public _servicio(JSONObject obj, SSSessionAbstract sesion) {
         if (!obj.isNull("type")) {
-            if(sesion==null){
-                SConsole.warning("Socket Client,", " ( OU= "+obj.getJSONObject("info").getJSONObject("cert").getString("OU"),") servicio,", obj.getString("type"));
-            }else{
-                SConsole.warning("Socket Server,", "servicio,", obj.getString("type"));
-            }
+            // if (sesion == null) {
+            // SConsole.warning("Socket Client,",
+            // " ( OU= " + obj.getJSONObject("info").getJSONObject("cert").getString("OU"),
+            // ") servicio,",
+            // obj.getString("type"));
+            // } else {
+            // SConsole.warning("Socket Server,", "servicio,", obj.getString("type"));
+            // }
             switch (obj.getString("type")) {
-            case "init":
-                init(obj, sesion);
-                break;
-            case "initServer":
-                initServer(obj, sesion);
-                break;
-            case "initClient":
-                initClient(obj, sesion);
-                break;
-            case "getServicioHabilitado":
-                getServicioHabilitado(obj, sesion);
-                break;
-            case "getEstadoServicio":
-                getEstadoServicio(obj, sesion);
-                break;
-            case "getPem":
-                getPem(obj);
-                break;
+                case "init":
+                    init(obj, sesion);
+                    break;
+                case "initServer":
+                    initServer(obj, sesion);
+                    break;
+                case "initClient":
+                    initClient(obj, sesion);
+                    break;
+                case "getServicioHabilitado":
+                    getServicioHabilitado(obj, sesion);
+                    break;
+                case "getEstadoServicio":
+                    getEstadoServicio(obj, sesion);
+                    break;
+                case "getPem":
+                    getPem(obj);
+                    break;
 
             }
         }
     }
 
     private void getEstadoServicio(JSONObject obj, SSSessionAbstract sesion) {
+        if (obj.getString("estado").equals("error")) {
+            SConsole.error("ERROR EN EL ESTADO DEL SERVICIO ", obj.getString("error"));
+            return;
+        }
         JSONObject servicio = obj.getJSONObject("data");
         SSServerAbstract.getSession(obj.getString("id_session")).setServicio(servicio);
         obj.put("component", "servicio");
@@ -63,6 +76,8 @@ public class _servicio {
         obj.put("estado", "exito");
         obj.put("data", servicio);
         SSServerAbstract.getSession(obj.getString("id_session")).send(obj.toString());
+
+        // services_sessions.put(obj.getString("key"), sesion);
         SConsole.succes("SERVICIO Identificado", "\t|\t", obj.getString("id_session"), "\t|\t",
                 servicio.getString("nombre"));
     }
@@ -106,7 +121,7 @@ public class _servicio {
 
     private void initClient(JSONObject obj, SSSessionAbstract sesion) {
         if (sesion == null) {
-            SConsole.succes("SERVER INICIADO:"+obj.getJSONObject("info").getJSONObject("cert").getString("OU"));
+            SConsole.succes("SERVER INICIADO:" + obj.getJSONObject("info").getJSONObject("cert").getString("OU"));
             return;
         }
         SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());

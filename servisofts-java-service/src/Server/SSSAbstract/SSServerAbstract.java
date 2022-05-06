@@ -11,6 +11,7 @@ import org.json.JSONObject;
 // import FireBase.FireBaseTokens;
 import Server.SSSInterface.SSServerInterface;
 import Servisofts.SConsole;
+import _component._servicio;
 
 public abstract class SSServerAbstract implements SSServerInterface {
 
@@ -84,6 +85,23 @@ public abstract class SSServerAbstract implements SSServerInterface {
                     JSONObject servicio = server.getSessiones().get(key_session.getKey()).getServicio();
                     if (servicio != null) {
                         if (servicio.getString("nombre").equals(nombre)) {
+                            return server.getSessiones().get(key_session.getKey());
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static SSSessionAbstract getSessionByKeyServicio(String key_servicio) {
+        for (Map.Entry me : SERVIDORES.entrySet()) {
+            SSServerAbstract server = SERVIDORES.get(me.getKey());
+            for (Map.Entry key_session : server.getSessiones().entrySet()) {
+                if (server.getSessiones().get(key_session.getKey()) != null) {
+                    JSONObject servicio = server.getSessiones().get(key_session.getKey()).getServicio();
+                    if (servicio != null) {
+                        if (servicio.getString("key").equals(key_servicio)) {
                             return server.getSessiones().get(key_session.getKey());
                         }
                     }

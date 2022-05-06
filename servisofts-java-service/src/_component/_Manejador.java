@@ -8,16 +8,22 @@ import SocketCliente.SocketCliente;
 
 public class _Manejador {
     public _Manejador(JSONObject data, SSSessionAbstract sesion) {
-        try{
+        try {
             if (!data.isNull("component")) {
-                switch (data.getString("component")) {
-                    case "servicio":
-                        new _servicio(data, sesion);
-                        break;
-                    case "usuario":
-                        new _Usuario(data, sesion);
-                        break;
+
+                try {
+                    switch (data.getString("component")) {
+                        case "servicio":
+                            new _servicio(data, sesion);
+                            break;
+                        case "usuario":
+                            new _Usuario(data, sesion);
+                            break;
+                    }
+                } catch (Exception e) {
+                    SConsole.error("Error en el componente: " + data.getString("component"));
                 }
+
                 if (Servisofts.Manejador != null) {
                     Servisofts.Manejador.apply(data, sesion);
                 }
@@ -29,7 +35,7 @@ public class _Manejador {
             } else {
                 data.put("error", "No existe el componente");
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             SConsole.error("Error en el manejador de componentes: " + e.getLocalizedMessage());
         }
     }

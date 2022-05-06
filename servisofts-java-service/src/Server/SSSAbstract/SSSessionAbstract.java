@@ -62,7 +62,12 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
         data.put("noSend", false);
         // Router router = new Router(Router.TIPO_WS, this);
         if (this.servicio != null) {
-            data.put("servicio",this.servicio);
+            data.put("servicio", this.servicio);
+        }
+        String nombre = SConfig.getJSON().getString("nombre");
+        if (data.has("_sincrone_key_" + nombre)) {
+            String sincrone_key = data.getString("_sincrone_key_" + nombre);
+            SSSincSend.mapa.get(sincrone_key).onMesagge(data);
         }
         new _Manejador(data, this);
         if (!data.getBoolean("noSend")) {
@@ -116,6 +121,16 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
             return null;
         }
         return this.pendiente.getJSONObject(key);
+    }
+
+    @Override
+    public JSONObject sendSync(JSONObject obj) {
+        return new SSSincSend(this).send(obj);
+    }
+
+    @Override
+    public JSONObject sendSync(JSONObject obj, int timeOut) {
+        return new SSSincSend(this, timeOut).send(obj);
     }
 
 }

@@ -18,9 +18,10 @@ public class Api {
             }
             JSONObject request = new JSONObject(sb.toString());
             new _Manejador(request, null);
-            t.sendResponseHeaders(200, request.toString().length());
+            byte[] bs = request.toString().getBytes("UTF-8");
+            t.sendResponseHeaders(200, bs.length);
             OutputStream os = t.getResponseBody();
-            os.write(request.toString().getBytes());
+            os.write(bs);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();

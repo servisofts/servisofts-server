@@ -8,11 +8,16 @@ import _component._servicio;
 public class ManejadorCliente {
 
     public static void onMessage(JSONObject action, JSONObject config) {
-        switch (action.getString("component")) {
-            case "servicio":
-                new _servicio(action, null);
-                break;
+        try {
+            switch (action.getString("component")) {
+                case "servicio":
+                    new _servicio(action, null);
+                    break;
+            }
+        } catch (Exception e) {
+            // SConsole.error("session no encontrada");
         }
+
         if (Servisofts.ManejadorCliente != null) {
             Servisofts.ManejadorCliente.apply(action, config);
         }
@@ -20,7 +25,7 @@ public class ManejadorCliente {
             try {
                 SSServerAbstract.getSession(action.getString("id_session")).send(action.toString());
             } catch (Exception e) {
-               //SConsole.error("session no encontrada");
+                // SConsole.error("session no encontrada");
             }
         }
     }

@@ -21,6 +21,7 @@ public class Servisofts {
 
     public static Manejador<JSONObject, SSSessionAbstract> Manejador;
     public static Manejador<JSONObject, JSONObject> ManejadorCliente;
+    public static boolean DEBUG = true;
 
     public static void initialize() throws KeyStoreException, JSONException, CertificateException, IOException {
         SConsole.succes("------------------------------------------------------------------------");
@@ -42,7 +43,9 @@ public class Servisofts {
     }
 
     public static void initSConfig() {
-        SConsole.warning("Initializing", SConfig.configFile);
+        if (Servisofts.DEBUG) {
+            SConsole.warning("Initializing", SConfig.configFile);
+        }
         if (!SConfig.validate()) {
             SConsole.error("Failed to initilizing", SConfig.configFile);
             System.exit(1);
@@ -51,7 +54,9 @@ public class Servisofts {
     }
 
     public static void initSSL() {
-        SConsole.warning("Initilizing JKS from ./" + SConfig.getJSON("ssl").getString("nombre_jks") + ".jks");
+        if (Servisofts.DEBUG) {
+            SConsole.warning("Initilizing JKS from ./" + SConfig.getJSON("ssl").getString("nombre_jks") + ".jks");
+        }
         SSL.getKeyStore();
         SConsole.succes("JSK ready!");
     }
@@ -67,16 +72,20 @@ public class Servisofts {
         SConsole.log("         OU = " + certificado.getString("OU"));
         SConsole.info("");
         SConsole.log("FingerPrint = " + certificado.getString("fingerp"));
-        SConsole.info("");
-        SConsole.log("        PEM = " + certificado.getString("pem"));
+        if (Servisofts.DEBUG) {
+            SConsole.info("");
+            SConsole.log("        PEM = " + certificado.getString("pem"));
+        }
         SConsole.info("------------------------------");
         SConsole.info("");
     }
 
     public static void initServicioCert() throws KeyStoreException, JSONException, CertificateException, IOException {
-        SConsole.warning("Initilizing certificate ( OU=servicio )");
+        if (Servisofts.DEBUG) {
+            SConsole.warning("Initilizing certificate ( OU=servicio )");
+        }
         if (!SSL.servicioCert()) {
-            System.out.println("Server closed.");
+            SConsole.error("Failed to load certificate.");
             System.exit(1);
         }
     }
@@ -86,7 +95,9 @@ public class Servisofts {
     }
 
     public static void initSocketClient() {
-        SConsole.warning("Initilizing Socket Client");
+        if (Servisofts.DEBUG) {
+            SConsole.warning("Initilizing Socket Client");
+        }
         SocketCliente.enableReconect(true);
         SocketCliente.Start(SConfig.getJSON("socket_client").getJSONObject("servicio"));
     }

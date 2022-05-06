@@ -51,7 +51,9 @@ public class SPGConect {
                     return con;
                 }
             }
-            SConsole.warning("Initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
+            if (Servisofts.DEBUG) {
+                SConsole.warning("Initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
+            }
 
             con = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name, usuario,
                     contrasena);
@@ -125,28 +127,34 @@ public class SPGConect {
                     && !tupla.getString("column_name").equals("fecha_on")) {
                 if (!obj.isNull(tupla.getString("column_name"))) {
                     switch (tupla.getString("data_type")) {
-                    case "character varying":
-                        aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
-                                + "',";
-                        break;
-                    case "timestamp without time zone":
-                        aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
-                                + "',";
-                        break;
-                    case "double precision":
-                        aux += tupla.getString("column_name") + "=" + obj.getDouble(tupla.getString("column_name"))
-                                + ",";
-                        break;
-                    case "integer":
-                        aux += tupla.getString("column_name") + "=" + obj.getInt(tupla.getString("column_name")) + ",";
-                        break;
-                    case "json":
-                        aux += tupla.getString("column_name") + "='" + obj.get(tupla.getString("column_name")).toString() + "',";
-                        break;
-                    default:
-                        aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
-                                + "',";
-                        break;
+                        case "character varying":
+                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                                    + "',";
+                            break;
+                        case "timestamp without time zone":
+                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                                    + "',";
+                            break;
+                        case "double precision":
+                            aux += tupla.getString("column_name") + "=" + obj.getDouble(tupla.getString("column_name"))
+                                    + ",";
+                            break;
+                        case "integer":
+                            aux += tupla.getString("column_name") + "=" + obj.getInt(tupla.getString("column_name"))
+                                    + ",";
+                            break;
+                        case "json":
+                            aux += tupla.getString("column_name") + "='"
+                                    + obj.get(tupla.getString("column_name")).toString() + "',";
+                            break;
+                        case "boolean":
+                            aux += tupla.getString("column_name") + "="
+                                    + obj.getBoolean(tupla.getString("column_name")) + ",";
+                            break;
+                        default:
+                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                                    + "',";
+                            break;
                     }
                 }
             }
@@ -165,6 +173,14 @@ public class SPGConect {
 
     public static PreparedStatement preparedStatement(String query) throws SQLException {
         return getConexion().prepareStatement(query);
+    }
+
+    public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
+        String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
+                + ", '" + (new JSONArray().put(json)).toString() + "')) RETURNING key";
+        PreparedStatement ps = con.prepareStatement(funct);
+        ps.executeQuery();
+        ps.close();
     }
 
     public static void insertArray(String nombre_tabla, JSONArray json) throws SQLException {
