@@ -24,3 +24,4 @@ jar cfM "${path_dir}.jar" -C bin/ .
 #Copy to USUARIO
 #cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/usuario/server/lib/
 #cp "${path_dir}.jar" /Users/rickypazd/Documents/GitHub/kolping/server/lib/
+# scp ./servisofts-java-service.jar ruddy@192.168.0.199:/home/ruddy/Documents/GitHub/darmotos/server/lib

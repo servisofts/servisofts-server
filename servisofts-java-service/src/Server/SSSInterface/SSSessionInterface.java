@@ -6,6 +6,8 @@ import Server.MensajeSocket;
 
 public interface SSSessionInterface {
 
+    public boolean isOpen();
+
     public void onClose(JSONObject obj);
 
     public void onMessage(String mensaje);

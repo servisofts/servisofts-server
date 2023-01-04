@@ -43,7 +43,11 @@ public class SessionSocket extends SSSessionAbstract {
     @Override
     public void onMessage(String mensaje) {
         JSONObject data = new JSONObject(mensaje);
-        onMenssage(data);
+        new Thread() {
+            public void run() {
+                onMenssage(data);
+            };
+        }.start();
     }
 
     @Override
@@ -115,8 +119,12 @@ public class SessionSocket extends SSSessionAbstract {
                                     obj.put("estado", "error");
                                     obj.put("error", e.getLocalizedMessage());
                                     onError(obj);
+                                    SConsole.error("Error en onMessage if e.getMessage() != null ");
+                                    e.printStackTrace();
                                 } else {
+                                    SConsole.error("Error en onMessage else ");
                                     isRun = false;
+                                    e.printStackTrace();
                                 }
                             }
                         }
@@ -141,6 +149,17 @@ public class SessionSocket extends SSSessionAbstract {
     public void printLog(String mensaje) {
         SConsole.info(getIdSession() + ": " + mensaje);
 
+    }
+
+    @Override
+    public boolean isOpen() {
+        if (miSession == null) {
+            return false;
+        }
+        if (miSession.isClosed()) {
+            return false;
+        }
+        return true;
     }
 
 }

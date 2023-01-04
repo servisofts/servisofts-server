@@ -35,6 +35,7 @@ public class Session {
         obj.put("estado","error");
         obj.put("error",cause.getMessage());
         MiSession.onError(obj);
+        // cause.printStackTrace();
     }
 
 }

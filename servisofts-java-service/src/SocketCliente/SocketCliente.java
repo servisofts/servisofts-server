@@ -15,6 +15,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import Servisofts.SConfig;
 import Servisofts.SConsole;
+import Servisofts.SLog;
 // import component.ManejadorServicio;
 // import util.console;
 // import Config.Config;
@@ -213,7 +214,7 @@ public class SocketCliente extends Thread {
             String nombre = SConfig.getJSON().getString("nombre");
             JSONObject data = new JSONObject(msg);
             data.put("info", config);
-            if (data.has("_sincrone_key_"+nombre)) {
+            if (data.has("_sincrone_key_" + nombre)) {
                 String sincrone_key = data.getString("_sincrone_key_" + nombre);
                 SCSincroneSend.mapa.get(sincrone_key).onMesagge(data);
             }
@@ -235,10 +236,12 @@ public class SocketCliente extends Thread {
             } else {
                 this.Open = false;
                 SConsole.error("Session cliente close");
+                String name = config.getJSONObject("cert").getString("OU");
+                SLog.put("Servicios." + name + ".status", "desconectado");
                 if (config.has("noSSL")) {
-                    SocketCliente.ConexinesFallidasNoSSL.put(config.getJSONObject("cert").getString("OU"), config);
+                    SocketCliente.ConexinesFallidasNoSSL.put(name, config);
                 } else {
-                    SocketCliente.ConexinesFallidas.put(config.getJSONObject("cert").getString("OU"), config);
+                    SocketCliente.ConexinesFallidas.put(name, config);
                 }
             }
 

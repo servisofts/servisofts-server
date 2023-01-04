@@ -2,6 +2,7 @@ package ServerHttp;
 
 import Servisofts.SConfig;
 import Servisofts.SConsole;
+import Servisofts.http.Rest;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -26,8 +27,14 @@ public class ServerHttp {
             HttpContext uploadContext = server.createContext("/upload");
             uploadContext.setHandler(Upload::handleRequest);
 
+
+            HttpContext context = server.createContext("/rest/");
+            context.setHandler(Rest::RestHandler);
+
+
             HttpContext downloadContext = server.createContext("/");
             downloadContext.setHandler(Download::handleRequest);
+
 
             server.start();
             SConsole.succes("HttpServer on port ( " + puerto + " ) is ready!");

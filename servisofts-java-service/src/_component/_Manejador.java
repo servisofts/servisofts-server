@@ -7,7 +7,7 @@ import Servisofts.Servisofts;
 import SocketCliente.SocketCliente;
 
 public class _Manejador {
-    public _Manejador(JSONObject data, SSSessionAbstract sesion) {
+    public static JSONObject factory(JSONObject data, SSSessionAbstract sesion) {
         try {
             if (!data.isNull("component")) {
 
@@ -30,13 +30,26 @@ public class _Manejador {
                 if (data.has("service")) {
                     String service = data.getString("service");
                     data.remove("service");
-                    SocketCliente.send(service, data, sesion);
+                    // Cambie el send por sendSinc 20/jul/2022 2
+                    data = SocketCliente.sendSinc(service, data, 20000);
+                    if (data.has("servicio")) {
+                        data.remove("servicio");
+                    }
+                    if (data.has("id")) {
+                        data.remove("id");
+                    }
+                    if (data.has("info")) {
+                        data.remove("info");
+                    }
+
                 }
             } else {
                 data.put("error", "No existe el componente");
             }
         } catch (Exception e) {
-            SConsole.error("Error en el manejador de componentes: " + e.getLocalizedMessage());
+            SConsole.error("Error en el manejador de componentes: " + e.getMessage());
+            e.printStackTrace();
         }
+        return data;
     }
 }

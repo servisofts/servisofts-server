@@ -37,11 +37,13 @@ public class SCSincroneSend {
         if (cli == null) {
             obj.put("estado", "error");
             obj.put("error", "No se encontro el cliente");
+        } else {
+            if (!cli.isOpen()) {
+                obj.put("estado", "error");
+                obj.put("error", "El cliente esta cerrado");
+            }
         }
-        if (!cli.isOpen()) {
-            obj.put("estado", "error");
-            obj.put("error", "El cliente esta cerrado");
-        }
+
         String nombre = SConfig.getJSON().getString("nombre");
         obj.put("_sincrone_key_" + nombre, key);
         mapa.put(key, this);
@@ -60,14 +62,17 @@ public class SCSincroneSend {
                 e.printStackTrace();
             }
         }
+        this.obj.remove("_sincrone_key_" + nombre);
         mapa.remove(key);
         return this.obj;
     }
 
     public void onMesagge(JSONObject data) {
-        System.out.println("Response");
+        // System.out.println("Response");
+        // System.out.println(data.toString());
         this.obj = data;
         isRun = false;
+        this.timeOut = 0;
 
     }
 }

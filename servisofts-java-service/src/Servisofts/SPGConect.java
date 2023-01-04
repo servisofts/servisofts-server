@@ -36,8 +36,12 @@ public class SPGConect {
         puerto = data_base.getInt("puerto") + "";
         usuario = data_base.getString("user");
         contrasena = data_base.getString("pass");
-        // ruta_pg_dump = data_base.getString("pg_dump");
-        // ruta_pg_restore = data_base.getString("pg_restore");
+        SLog.put("PostgreSQL.status", "desconectado");
+        SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name);
+        // SLog.put("PostgreSQL.user", usuario);
+        // SLog.put("PostgreSQL.password",
+        // contrasena.substring(0, 4) + contrasena.substring(4,
+        // contrasena.length()).replaceAll(".", "*"));
         return conectar();
 
     }
@@ -54,15 +58,16 @@ public class SPGConect {
             if (Servisofts.DEBUG) {
                 SConsole.warning("Initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
             }
-
             con = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name, usuario,
                     contrasena);
 
             SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" + contrasena, "ready!");
+            SLog.put("PostgreSQL.status", "exito");
             // restore_backup();
             // save_backup();
             return con;
         } catch (Exception e) {
+            SLog.put("PostgreSQL.status", "desconectado");
             SConsole.error("Failed to initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
         }
         return null;
@@ -124,7 +129,11 @@ public class SPGConect {
         for (int i = 0; i < tabla.length(); i++) {
             tupla = tabla.getJSONObject(i);
             if (!tupla.getString("column_name").equals("key") && !tupla.getString("column_name").equals("key")
-                    && !tupla.getString("column_name").equals("fecha_on")) {
+            /*
+             * && !tupla.getString("column_name").equals("fecha_on")
+             * ** SE COMENTO EL 30/12/2022 Cuando se modificaba en histirico de almancen en
+             * el producto
+             **/) {
                 if (!obj.isNull(tupla.getString("column_name"))) {
                     switch (tupla.getString("data_type")) {
                         case "character varying":

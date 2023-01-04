@@ -136,29 +136,32 @@ public abstract class SSServerAbstract implements SSServerInterface {
     // t.start();
     // }
 
-    public static void sendUsers(String mensaje, JSONArray key_usrs) {
+    public static void sendUser(JSONObject data, String key_usrs) {
         Thread t = new Thread() {
             @Override
             public void run() {
-                for (int i = 0; i < key_usrs.length(); i++) {
-                    ArrayList<String> devices = USUARIOS.get(key_usrs.getString(i));
-                    if (devices == null) {
-                        continue;
-                    }
-                    for (String idDevice : devices) {
-                        String idSession = DEVICES.get(idDevice);
-                        for (Map.Entry me : SERVIDORES.entrySet()) {
-                            SSServerAbstract server = SERVIDORES.get(me.getKey());
-                            if (server.getSessiones().get(idSession) != null) {
-                                server.getSessiones().get(idSession).send(mensaje);
-                            }
+                String message = data.toString();
+                for (Map.Entry me : SERVIDORES.entrySet()) {
+                    SSServerAbstract server = SERVIDORES.get(me.getKey());
+                    HashMap<String, SSSessionAbstract> sesiones = server.getSessiones();
+                    for (Map.Entry ks : sesiones.entrySet()) {
+                        SSSessionAbstract ses = sesiones.get(ks.getKey());
+                        if (ses.getKeyUsuario().equals(key_usrs)) {
+                            ses.send(message);
                         }
-
                     }
                 }
             }
         };
         t.start();
+
+    }
+
+    public static void sendUsers(JSONObject data, JSONArray key_usrs) {
+        for (int i = 0; i < key_usrs.length(); i++) {
+            String key_usr = key_usrs.getString(i);
+            sendUser(data, key_usr);
+        }
     }
 
     public static void sendServer(String tipo, String mensaje) {

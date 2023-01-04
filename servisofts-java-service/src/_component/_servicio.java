@@ -19,6 +19,7 @@ import ServerHttp.ServerHttp;
 import Servisofts.Regex;
 import Servisofts.SConfig;
 import Servisofts.SConsole;
+import Servisofts.SLog;
 import Servisofts.SMyIp;
 import Servisofts.SSL;
 import SocketCliente.SocketCliente;
@@ -86,15 +87,20 @@ public class _servicio {
         JSONArray data = obj.getJSONArray("data");
         SConsole.info("----SERVICIO HABILITADOS---------------------------");
         JSONObject serviciosH = new JSONObject();
+        String nombre;
+        String host;
         for (int i = 0; i < data.length(); i++) {
             JSONObject serhabilitado = data.getJSONObject(i);
-            SocketCliente.servicios_habilitados.put(serhabilitado.getJSONObject("servicio").getString("nombre"),
+            nombre = serhabilitado.getJSONObject("servicio").getString("nombre");
+            host = serhabilitado.getJSONObject("servicio").getString("ip") + ":"
+                    + serhabilitado.getJSONObject("servicio").getInt("puerto");
+            SocketCliente.servicios_habilitados.put(nombre,
                     serhabilitado.getJSONObject("servicio"));
 
-            SConsole.info(serhabilitado.getJSONObject("servicio").getString("nombre") + " - "
-                    + serhabilitado.getJSONObject("servicio").getString("ip") + ":"
-                    + serhabilitado.getJSONObject("servicio").getInt("puerto"));
+            SConsole.info(nombre + " - " + host);
             if (!serhabilitado.getJSONObject("servicio").getString("nombre").equals("servicio")) {
+                SLog.put("Servicios." + nombre + ".host", host);
+                SLog.put("Servicios." + nombre + ".status", "desconectado");
                 SocketCliente.StartServicio(serhabilitado.getJSONObject("servicio").getString("nombre"));
             }
         }
@@ -121,7 +127,9 @@ public class _servicio {
 
     private void initClient(JSONObject obj, SSSessionAbstract sesion) {
         if (sesion == null) {
-            SConsole.succes("SERVER INICIADO:" + obj.getJSONObject("info").getJSONObject("cert").getString("OU"));
+            String name = obj.getJSONObject("info").getJSONObject("cert").getString("OU");
+            SConsole.succes("SERVER INICIADO:" + name);
+            SLog.put("Servicios." + name + ".status", "exito");
             return;
         }
         SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());

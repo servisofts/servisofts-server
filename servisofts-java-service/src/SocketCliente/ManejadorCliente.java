@@ -1,7 +1,9 @@
 package SocketCliente;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import Server.SSSAbstract.SSServerAbstract;
+import Servisofts.SConsole;
 import Servisofts.Servisofts;
 import _component._servicio;
 
@@ -27,6 +29,29 @@ public class ManejadorCliente {
             } catch (Exception e) {
                 // SConsole.error("session no encontrada");
             }
+        }
+        if (action.has("sendAll")) {
+            JSONObject actionClone = new JSONObject(action.toString());
+            actionClone.remove("sendAll");
+            if (actionClone.has("_ssocket_promise")) {
+                actionClone.remove("_ssocket_promise");
+            }
+            // if (actionClone.has("servicio")) {
+            // actionClone.remove("servicio");
+            // }
+            SSServerAbstract.sendAllServer(actionClone.toString());
+        }
+        if (action.has("sendUsers")) {
+            JSONObject actionClone = new JSONObject(action.toString());
+            JSONArray arr = action.getJSONArray("sendUsers");
+            actionClone.remove("sendUsers");
+            if (actionClone.has("_ssocket_promise")) {
+                actionClone.remove("_ssocket_promise");
+            }
+            // if (actionClone.has("servicio")) {
+            // actionClone.remove("servicio");
+            // }
+            SSServerAbstract.sendUsers(actionClone, arr);
         }
     }
 }

@@ -69,10 +69,17 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
             String sincrone_key = data.getString("_sincrone_key_" + nombre);
             SSSincSend.mapa.get(sincrone_key).onMesagge(data);
         }
-        new _Manejador(data, this);
-        if (!data.getBoolean("noSend")) {
-            send(data.toString());
+        data = _Manejador.factory(data, this);
+
+        if (data.has("noSend")) {
+            if (data.getBoolean("noSend")) {
+                return;
+            }
         }
+        send(data.toString());
+
+        // data.remove("noSend");
+
     }
 
     public void onClose(JSONObject data) {

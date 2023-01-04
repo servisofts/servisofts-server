@@ -1,5 +1,7 @@
 package Servisofts;
 
+import java.util.Date;
+
 public class SConsole {
     private static final String ANSI_BLACK = "\u001B[30m";
     private static final String ANSI_RED = "\u001B[31m";
@@ -23,6 +25,7 @@ public class SConsole {
 
     public static void log(Object... args) {
         System.out.print(ANSI_RESET);
+        System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i] + " ");
         }
@@ -31,6 +34,7 @@ public class SConsole {
 
     public static void succes(Object... args) {
         System.out.print(ANSI_GREEN);
+        System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i] + " ");
         }
@@ -39,6 +43,7 @@ public class SConsole {
 
     public static void warning(Object... args) {
         System.out.print(ANSI_YELLOW);
+        System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i] + " ");
         }
@@ -47,6 +52,7 @@ public class SConsole {
 
     public static void info(Object... args) {
         System.out.print(ANSI_BLUE);
+        System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i] + " ");
         }
@@ -55,6 +61,7 @@ public class SConsole {
 
     public static void error(Object... args) {
         System.out.print(ANSI_RED);
+        System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
             System.out.print(args[i] + " ");
         }

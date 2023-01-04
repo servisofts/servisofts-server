@@ -11,9 +11,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import Server.SSSAbstract.SSSessionAbstract;
+import Servisofts.http.Rest;
 import SocketCliente.SocketCliente;
 
 public class Servisofts {
+
     @FunctionalInterface
     public interface Manejador<T, U> {
         public void apply(T t, U u);
@@ -31,12 +33,17 @@ public class Servisofts {
         SConsole.succes("                                                                        ");
         SConsole.succes("------------------------------------------------------------------------");
         SConsole.succes("------------------------------------------------------------------------");
+        // SLog.put("status.config", "cargando");
         initSConfig();
+        // SLog.put("status.config", "exito");
+        // SLog.put("status.ssl", "cargando");
         initSSL();
+        // SLog.put("status.ssl", "exito");
         initDefaultCert();
         if (!SConfig.getJSON("ssl").getJSONObject("cert").getString("OU").equals("servicio")) {
             initServicioCert();
         }
+        
         initSPGConect();
         initSocketClient();
 

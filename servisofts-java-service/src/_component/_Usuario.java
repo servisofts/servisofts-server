@@ -19,13 +19,13 @@ public class _Usuario {
     public _Usuario(JSONObject data, SSSessionAbstract session) {
         switch (data.getString("type")) {
         case "identificacion":
-            identificaion(data, session);
+            identificacion(data, session);
             break;
         }
 
     }
 
-    public void identificaion(JSONObject obj, SSSessionAbstract session) {
+    public void identificacion(JSONObject obj, SSSessionAbstract session) {
         String deviceKey = obj.getString("deviceKey");
         JSONObject data = obj.getJSONObject("data");
         try {
