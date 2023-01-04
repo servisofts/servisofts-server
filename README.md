@@ -24,4 +24,4 @@ mv ./servisofts-java-service.jar ./lib/servisofts-java-service.jar
 
 Deberiamos quedar con la siguiente estructura de carpetas:
 
-
+![image](https://user-images.githubusercontent.com/35882906/210668035-8dbc63f7-6d55-4c89-8a23-9d0e9f2ce817.png)
