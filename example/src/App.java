@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import Controller.exampleController;
+import Controller.restauranteController;
 import Servisofts.SConfig;
 import Servisofts.SPGConect;
 import Servisofts.Servisofts;
@@ -32,6 +33,7 @@ public class App {
         // *** Para iniciar un REST API ***
 
         Rest.addController(exampleController.class);
+        Rest.addController(restauranteController.class);
         Rest.start(8081);
     }
 }
