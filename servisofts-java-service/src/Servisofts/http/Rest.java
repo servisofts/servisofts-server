@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import org.jboss.com.sun.net.httpserver.HttpContext;
 import org.jboss.com.sun.net.httpserver.HttpExchange;
@@ -64,10 +66,15 @@ public abstract class Rest {
         }
         String data = sb.toString();
         onMessage(t, data, response);
-        t.sendResponseHeaders(response.getCode(), response.toString().length());
-        OutputStream os = t.getResponseBody();
-        os.write(response.toString().getBytes());
-        os.close();
+        ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        t.sendResponseHeaders(response.getCode(), bytes.length);
+        t.getResponseBody().write(bytes);
+        t.close();
+        // OutputStream os = t.getResponseBody();
+        // os.write(response.toString().getBytes());
+        // os.close();
     }
 
     private static void onMessage(
