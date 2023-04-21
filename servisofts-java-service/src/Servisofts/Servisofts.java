@@ -25,11 +25,14 @@ public class Servisofts {
     public static Manejador<JSONObject, JSONObject> ManejadorCliente;
     public static boolean DEBUG = true;
 
+    public static String VERSION = "1.0.1";
+
     public static void initialize() throws KeyStoreException, JSONException, CertificateException, IOException {
         SConsole.succes("------------------------------------------------------------------------");
         SConsole.succes("------------------------------------------------------------------------");
         SConsole.succes("                                                                        ");
         SConsole.succes("                                SERVISOFTS                              ");
+        SConsole.succes("                                V. " + VERSION + "                              ");
         SConsole.succes("                                                                        ");
         SConsole.succes("------------------------------------------------------------------------");
         SConsole.succes("------------------------------------------------------------------------");
@@ -43,7 +46,7 @@ public class Servisofts {
         if (!SConfig.getJSON("ssl").getJSONObject("cert").getString("OU").equals("servicio")) {
             initServicioCert();
         }
-        
+
         initSPGConect();
         initSocketClient();
 

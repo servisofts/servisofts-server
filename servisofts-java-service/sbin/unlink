@@ -1,0 +1,4 @@
+#!/bin/bash
+. config.env
+
+rm -f "$ROUTE_SS/src"

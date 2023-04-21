@@ -116,6 +116,25 @@ public class SPGConect {
         }
     }
 
+    public static String escapeEspecialChar(String in) {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < in.length(); i++) {
+            char c = in.charAt(i);
+            switch (c) {
+                case '\'':
+                    output.append("''");
+                    break;
+                case '\\':
+                    output.append("\\\\");
+                    break;
+                default:
+                    output.append(c);
+                    break;
+            }
+        }
+        return output.toString();
+    }
+
     public static boolean editObject(String nombre_tabla, JSONObject obj) throws SQLException {
 
         if (obj.isNull("key")) {
@@ -137,7 +156,8 @@ public class SPGConect {
                 if (!obj.isNull(tupla.getString("column_name"))) {
                     switch (tupla.getString("data_type")) {
                         case "character varying":
-                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                            aux += tupla.getString("column_name") + "='"
+                                    + escapeEspecialChar(obj.getString(tupla.getString("column_name")))
                                     + "',";
                             break;
                         case "timestamp without time zone":
@@ -153,15 +173,36 @@ public class SPGConect {
                                     + ",";
                             break;
                         case "json":
-                            aux += tupla.getString("column_name") + "='"
-                                    + obj.get(tupla.getString("column_name")).toString() + "',";
+                            if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                aux += tupla.getString("column_name") + "= NULL,";
+                            } else {
+                                aux += tupla.getString("column_name") + "='"
+                                        + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
+                            }
+                            break;
+                        case "json[]":
+                            if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                aux += tupla.getString("column_name") + "= NULL,";
+                            } else {
+                                aux += tupla.getString("column_name") + "='"
+                                        + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
+                            }
+                            break;
+                        case "ARRAY":
+                            if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                aux += tupla.getString("column_name") + "= NULL,";
+                            } else {
+                                aux += tupla.getString("column_name") + "='"
+                                        + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
+                            }
                             break;
                         case "boolean":
-                            aux += tupla.getString("column_name") + "="
-                                    + obj.getBoolean(tupla.getString("column_name")) + ",";
+                            aux += tupla.getString("column_name") + "= "
+                                    + obj.getBoolean(tupla.getString("column_name")) + " ,";
                             break;
                         default:
-                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                            aux += tupla.getString("column_name") + "='"
+                                    + escapeEspecialChar(obj.getString(tupla.getString("column_name")))
                                     + "',";
                             break;
                     }
@@ -244,7 +285,12 @@ public class SPGConect {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public static void execute(String consulta) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(consulta);
+        ps.execute();
+        ps.close();
     }
 
     public static void ejecutarUpdate(String consulta) {
@@ -255,7 +301,12 @@ public class SPGConect {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public static void executeUpdate(String consulta) throws SQLException {
+        PreparedStatement ps = con.prepareStatement(consulta);
+        ps.executeUpdate();
+        ps.close();
     }
 
     public static JSONObject ejecutarConsultaObject(String consulta) throws SQLException {

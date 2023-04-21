@@ -1,0 +1,6 @@
+#!/bin/bash
+
+. config.env
+
+echo $ROUTE_SS
+ln -s "$ROUTE_SS/src/" "$ROUTE_TO/src/"

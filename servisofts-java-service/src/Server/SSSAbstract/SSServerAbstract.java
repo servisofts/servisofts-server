@@ -146,9 +146,12 @@ public abstract class SSServerAbstract implements SSServerInterface {
                     HashMap<String, SSSessionAbstract> sesiones = server.getSessiones();
                     for (Map.Entry ks : sesiones.entrySet()) {
                         SSSessionAbstract ses = sesiones.get(ks.getKey());
-                        if (ses.getKeyUsuario().equals(key_usrs)) {
-                            ses.send(message);
+                        if (ses != null) {
+                            if ((ses.getKeyUsuario() + "").equals(key_usrs)) {
+                                ses.send(message);
+                            }
                         }
+
                     }
                 }
             }
