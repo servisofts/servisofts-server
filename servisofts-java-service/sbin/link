@@ -3,4 +3,9 @@
 . config.env
 
 echo $ROUTE_SS
-ln -s "$ROUTE_SS/src/" "$ROUTE_TO/src/"
+ln -s "$ROUTE_SS/lib" "$ROUTE_TO/lib/lib"
+ln -s "$ROUTE_SS/src/_component" "$ROUTE_TO/src/_component"
+ln -s "$ROUTE_SS/src/Server" "$ROUTE_TO/src/Server"
+ln -s "$ROUTE_SS/src/ServerHttp" "$ROUTE_TO/src/ServerHttp"
+ln -s "$ROUTE_SS/src/Servisofts" "$ROUTE_TO/src/Servisofts"
+ln -s "$ROUTE_SS/src/SocketCliente" "$ROUTE_TO/src/SocketCliente"

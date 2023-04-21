@@ -1,4 +1,9 @@
 #!/bin/bash
 . config.env
 
-rm -f "$ROUTE_SS/src"
+rm -f "$ROUTE_TO/lib/lib"
+rm -f "$ROUTE_TO/src/_component"
+rm -f "$ROUTE_TO/src/Server"
+rm -f "$ROUTE_TO/src/ServerHttp" "$ROUTE_TO/src/ServerHttp"
+rm -f "$ROUTE_TO/src/Servisofts"
+rm -f "$ROUTE_TO/src/SocketCliente"

@@ -23,10 +23,10 @@ public class ServerSocketWeb extends SSServerAbstract {
                     try {
                         SConsole.warning("Initializing WebSocket on port ( " + portNumber + " )");
                         Server server = new Server(portNumber);
-                        
                         WebSocketHandler wsHandler = new WebSocketHandler() {
                             @Override
                             public void configure(WebSocketServletFactory factory) {
+                                factory.getPolicy().setMaxTextMessageSize(1000000);
                                 factory.register(Session.class);
                             }
                         };
