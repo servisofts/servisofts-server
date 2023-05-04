@@ -58,10 +58,10 @@ public class SConfig {
                     }
                 }
             }
-            if (!obj.has("data_base")) {
-                SConsole.error("Parameter ( data_base ) type { bd_name, ip, puerto, user, pass } not found.");
-                return false;
-            }
+            // if (!obj.has("data_base")) {
+            //     SConsole.error("Parameter ( data_base ) type { bd_name, ip, puerto, user, pass } not found.");
+            //     return false;
+            // }
             return true;
         }
         return false;

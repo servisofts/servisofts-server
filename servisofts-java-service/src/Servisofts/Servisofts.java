@@ -101,6 +101,10 @@ public class Servisofts {
     }
 
     public static void initSPGConect() throws KeyStoreException, JSONException, CertificateException, IOException {
+        
+        if (!SConfig.getJSON().has("data_base")) {
+            return;
+        }
         SPGConect.setConexion(SConfig.getJSON("data_base"));
     }
 
