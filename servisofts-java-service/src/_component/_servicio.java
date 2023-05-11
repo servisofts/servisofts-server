@@ -97,10 +97,10 @@ public class _servicio {
             SocketCliente.servicios_habilitados.put(nombre,
                     serhabilitado.getJSONObject("servicio"));
 
-            SConsole.info(nombre + " - " + host);
+            SConsole.info( host+"\t"+nombre );
             if (!serhabilitado.getJSONObject("servicio").getString("nombre").equals("servicio")) {
-                SLog.put("Servicios." + nombre + ".host", host);
-                SLog.put("Servicios." + nombre + ".status", "desconectado");
+                // SLog.put("Servicios." + nombre + ".host", host);
+                SLog.put("Servicios." + nombre , false);
                 SocketCliente.StartServicio(serhabilitado.getJSONObject("servicio").getString("nombre"));
             }
         }
@@ -128,8 +128,9 @@ public class _servicio {
     private void initClient(JSONObject obj, SSSessionAbstract sesion) {
         if (sesion == null) {
             String name = obj.getJSONObject("info").getJSONObject("cert").getString("OU");
-            SConsole.succes("SERVER INICIADO:" + name);
-            SLog.put("Servicios." + name + ".status", "exito");
+            SConsole.succes("SERVER INICIADO:\t\t" + name);
+            // SLog.put("Servicios." + name + ".status", "exito");
+            SLog.put("Servicios." + name , true);
             return;
         }
         SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());

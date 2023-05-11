@@ -9,6 +9,7 @@ import Servisofts.http.annotation.PathVariable;
 import Servisofts.http.annotation.PostMapping;
 import Servisofts.http.annotation.PutMapping;
 import Servisofts.http.annotation.RequestBody;
+import Servisofts.http.annotation.RequestHeader;
 import Servisofts.http.annotation.RequestParam;
 
 // import Servisofts.mediator.Request;
@@ -121,8 +122,7 @@ public class Action {
       Response response,
       String path,
       String data,
-      Object instance)
-      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, HttpException {
+      Object instance) throws HttpException {
     Parameter[] parameters = this.method.getParameters();
     Map<String, String> path_params = queryToMap(t.getRequestURI().getQuery());
     // Class[] paramTypes = this.method.getParameterTypes();
@@ -143,8 +143,8 @@ public class Action {
 
         int i = lis.indexOf("{" + this.params.get(i_p_v) + "}");
         if (i == -1) {
-          throw new RuntimeException(
-              "No se encontro el parametro " + this.params.get(i_p_v));
+          throw new HttpException(Status.BAD_REQUEST,
+              "Request param not found " + this.params.get(i_p_v));
         }
         value = path.split("/")[i];
         values.add(parseValue(value, parameter.getType()));
@@ -165,15 +165,31 @@ public class Action {
           values.add(parseValue(path_params.get(name), parameter.getType()));
         } else {
           if (required == true) {
-            throw new HttpException(Status.BAD_REQUEST, "Parameter " + name + ":"+parameter.getType().getName()+" is required.");
+            throw new HttpException(Status.BAD_REQUEST,
+                "Parameter " + name + ":" + parameter.getType().getName() + " is required.");
           }
           values.add(parseValue(null, parameter.getType()));
-
         }
 
         continue;
       }
+      // RequestHeader
+      annotation = parameter.getAnnotation(RequestHeader.class);
+      if (annotation instanceof RequestHeader) {
+        RequestHeader anot = (RequestHeader) annotation;
+        try {
+          values.add(parseValue(t.getRequestHeaders().get(anot.value()).get(0), parameter.getType()));
+        } catch (Exception e) {
+          if (anot.required()) {
+            throw new HttpException(Status.BAD_REQUEST,
+                "Request Header param " + anot.value() + " is required.");
+          } else {
+            values.add("");
+          }
 
+        }
+        continue;
+      }
       values.add(null);
     }
 
@@ -191,14 +207,24 @@ public class Action {
   }
 
   public Object invoke(Object instance, Object... arg)
-      throws HttpException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+      throws HttpException {
     if (this.method == null) {
       return null;
     }
     if (!this.method.trySetAccessible()) {
       return null;
     }
-    return this.method.invoke(instance, arg);
+    try {
+      return this.method.invoke(instance, arg);
+    } catch (Exception e) {
+      if (e.getCause() instanceof HttpException) {
+        HttpException ex = (HttpException) e.getCause();
+        throw new HttpException(ex.getCode(), ex.getMessage());
+      } else {
+        throw new HttpException(Status.BAD_REQUEST, "Error desconocido, " + e.getLocalizedMessage());
+      }
+
+    }
   }
 
   public Map<String, String> queryToMap(String query) {

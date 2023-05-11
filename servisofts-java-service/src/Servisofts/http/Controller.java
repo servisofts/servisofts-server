@@ -65,8 +65,7 @@ public class Controller {
     }
 
     public void onMessage(HttpExchange t, String data, Response response)
-            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
-            NoSuchMethodException, SecurityException, HttpException {
+            throws HttpException {
         String path = t.getRequestURI().getPath();
         path = path.split("\\?")[0];
         path = path.substring(path.indexOf(route) + route.length());
@@ -78,9 +77,25 @@ public class Controller {
         boolean exito = false;
         for (Action action : actions) {
             if (action.equal(requestMethod, path)) {
-                Constructor<?> cos = this.controller.getConstructor(new Class[] {});
-                // IMediator m = new IMediator();
-                action.onMessage(t, response, path, data, cos.newInstance());
+                Constructor<?> cos;
+                try {
+                    cos = this.controller.getConstructor(new Class[] {});
+                    action.onMessage(t, response, path, data, cos.newInstance());
+                } catch (Exception e) {
+                    if (e instanceof HttpException) {
+                        HttpException ex = (HttpException) e;
+                        response.setCode(ex.getCode());
+                        response.setBody(ex.getMessage());
+                        throw new HttpException(ex.getCode(),
+                                ex.getMessage());
+                    } else {
+                        response.setCode(Status.BAD_REQUEST);
+                        response.setBody(e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                }
+
                 exito = true;
                 break;
             }

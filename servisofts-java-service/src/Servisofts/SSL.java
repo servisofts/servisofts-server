@@ -63,22 +63,29 @@ import org.json.JSONObject;
 
 public class SSL {
 
+    private static KeyStore jks;
+
     public static KeyStore getKeyStore() {
         String path = SConfig.getJSON("ssl").getString("nombre_jks") + ".jks";
         String pass = SConfig.getJSON("ssl").getString("pass_jks");
-        try {
-            File file = new File(path);
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            if (!file.exists()) {
-                keyStore.load(null, pass.toCharArray());
-                keyStore.store(new FileOutputStream(file), pass.toCharArray());
-            }
+        if (jks == null) {
+            try {
+                File file = new File(path);
+                KeyStore keyStore = KeyStore.getInstance("JKS");
+                if (!file.exists()) {
+                    keyStore.load(null, pass.toCharArray());
+                    keyStore.store(new FileOutputStream(file), pass.toCharArray());
+                }
 
-            keyStore.load(new FileInputStream(file), pass.toCharArray());
-            return keyStore;
-        } catch (Exception e) {
-            return null;
+                keyStore.load(new FileInputStream(file), pass.toCharArray());
+                jks = keyStore;
+                return jks;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
+        return jks;
 
     }
 
@@ -137,7 +144,8 @@ public class SSL {
             keyStore.deleteEntry(nombre);
             keyStore.setCertificateEntry(nombre, cert);
             keyStore.store(new FileOutputStream(path), pass.toCharArray());
-            // SConsole.warning("New certificate SSL ( OU=" + nombre + " ) is register on the " + path + " JKS!");
+            // SConsole.warning("New certificate SSL ( OU=" + nombre + " ) is register on
+            // the " + path + " JKS!");
             return true;
         } catch (Exception e) {
             return false;
@@ -391,7 +399,8 @@ public class SSL {
             // byte[] bpemCert = Files.readAllBytes(file.toPath());
             // certSConfig.put("cert", new String(Base64.encode(bpemCert)));
             // new Email(certConfig).start();
-            // SConsole.warning("New certificate SSL ( OU=" + certSConfig.getString("OU") + " ) generated!");
+            // SConsole.warning("New certificate SSL ( OU=" + certSConfig.getString("OU") +
+            // " ) generated!");
             getPKey(keyPair, certSConfig.getString("OU"));
             return true;
         } catch (CertificateEncodingException | InvalidKeyException | IllegalStateException | NoSuchProviderException

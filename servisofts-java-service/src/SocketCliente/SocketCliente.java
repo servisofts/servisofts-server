@@ -69,6 +69,16 @@ public class SocketCliente extends Thread {
 
     }
 
+    public static SSLContext ss;
+    public static SSLSocketFactory ssf ;
+
+    public static SSLSocketFactory getSocketFactory(){
+        if(ssf==null){
+            ss =  SSL.getSSLContext();
+            ssf = ss.getSocketFactory();
+        }
+        return ssf;
+    }
     public static void Start(JSONObject config) {
         if (Servisofts.DEBUG) {
             SConsole.warning("**Conectando con 'servisofts." + config.getJSONObject("cert").getString("OU")
@@ -77,13 +87,15 @@ public class SocketCliente extends Thread {
 
         // CONFIGURAMNO EL CLIENTE SOCKET Y CORREMOS EL HILO
         try {
-            SSLContext ss = SSL.getSSLContext();
-            SSLSocketFactory ssf = ss.getSocketFactory();
+            // SSLContext ss = SSL.getSSLContext();
+            SSLSocketFactory ssf = SocketCliente.getSocketFactory();
             SSLSocket s;
             s = (SSLSocket) ssf.createSocket(config.getString("ip"), config.getInt("puerto"));
             s.startHandshake();
             // INICIA LA CONEXION AL SOCKET new SocketCliete(config);
-            new SocketCliente(config, s);
+            // if (config.getInt("puerto") == 10001) {
+                new SocketCliente(config, s);
+            // }
 
         } catch (Exception e) {
             ConexinesFallidas.put(config.getJSONObject("cert").getString("OU"), config);
@@ -188,11 +200,17 @@ public class SocketCliente extends Thread {
     @Override
     public void run() {
         try {
-            String eventos;
+
             while (Open) {
-                eventos = request.readLine();
+                String eventos = request.readLine();
                 // System.out.println(eventos);
-                onMesagge(eventos, config);
+                new Thread() {
+                    @Override
+                    public void run() {
+                        onMesagge(eventos, config);
+                    }
+                }.start();
+
             }
         } catch (Exception ex) {
             onError(ex);

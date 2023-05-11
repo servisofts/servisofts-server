@@ -14,23 +14,30 @@ public class SLog {
 
     private static JSONObject data = new JSONObject();
 
-    private static ArrayList<String> keys =  new ArrayList<>();
-    public static void put(String key, Object obj) {
-        String[] keys = key.split("\\.");
-        JSONObject temp = data;
-        if (keys.length > 1) {
-            String k = "";
-            for (int i = 0; i < keys.length - 1; i++) {
-                k = keys[i];
-                if (!temp.has(k)) {
-                    temp.put(k, new JSONObject());
-                }
-                temp = temp.getJSONObject(k);
-            }
-        }
-        temp.put(keys[keys.length - 1], obj);
+    private static ArrayList<String> keys = new ArrayList<>();
 
-        write();
+    public static void put(String key, Object obj) {
+        try {
+            String[] keys = key.split("\\.");
+            JSONObject temp = data;
+            if (keys.length > 1) {
+                String k = "";
+                for (int i = 0; i < keys.length - 1; i++) {
+                    k = keys[i];
+                    if (!temp.has(k)) {
+                        temp.put(k, new JSONObject());
+                    }
+                    if (temp.get(k) instanceof JSONObject) {
+                        temp = temp.getJSONObject(k);
+                    }
+                }
+            }
+            temp.put(keys[keys.length - 1], obj);
+
+            write();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

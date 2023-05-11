@@ -56,22 +56,28 @@ public abstract class Rest {
         }
     }
 
-    public static void RestHandler(HttpExchange t) throws IOException {
+    public static void RestHandler(HttpExchange t) {
         Response response = new Response();
         StringBuilder sb = new StringBuilder();
-        InputStream ios = t.getRequestBody();
-        int i;
-        while ((i = ios.read()) != -1) {
-            sb.append((char) i);
+        try {
+            InputStream ios = t.getRequestBody();
+            int i;
+            while ((i = ios.read()) != -1) {
+                sb.append((char) i);
+            }
+
+            String data = sb.toString();
+            onMessage(t, data, response);
+            ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
+            byte[] bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+            t.sendResponseHeaders(response.getCode(), bytes.length);
+            t.getResponseBody().write(bytes);
+            t.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        String data = sb.toString();
-        onMessage(t, data, response);
-        ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
-        t.sendResponseHeaders(response.getCode(), bytes.length);
-        t.getResponseBody().write(bytes);
-        t.close();
         // OutputStream os = t.getResponseBody();
         // os.write(response.toString().getBytes());
         // os.close();
@@ -104,14 +110,7 @@ public abstract class Rest {
         }
         try {
             controller.onMessage(t, data, response);
-        } catch (
-                InstantiationException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InvocationTargetException
-                | NoSuchMethodException
-                | SecurityException
-                | HttpException e) {
+        } catch (HttpException e) {
 
             if (e instanceof HttpException) {
                 response.setCode(((HttpException) e).getCode());
@@ -120,7 +119,7 @@ public abstract class Rest {
                 response.setCode(((HttpException) e.getCause()).getCode());
                 response.setBody(((HttpException) e.getCause()).getMessage());
             } else {
-                response.setBody("Internal server error");
+                response.setBody(e.getLocalizedMessage());
                 response.setCode(Status.INTERNAL_SERVER_ERROR);
             }
         }
