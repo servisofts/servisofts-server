@@ -21,6 +21,7 @@ import org.jboss.com.sun.net.httpserver.HttpServer;
 public abstract class Rest {
 
     private static HashMap<String, Controller> controllers = new HashMap<String, Controller>();
+    public static String AllowCorsOrigin = "*";
 
     public static void addController(Class RestController) {
         try {
@@ -56,7 +57,16 @@ public abstract class Rest {
         }
     }
 
-    public static void RestHandler(HttpExchange t) {
+    public static void RestHandler(HttpExchange t) throws IOException {
+
+        t.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        if (t.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+          t.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+          //algo
+          t.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+          t.sendResponseHeaders(200, 0);
+          return;
+        }
         Response response = new Response();
         StringBuilder sb = new StringBuilder();
         try {

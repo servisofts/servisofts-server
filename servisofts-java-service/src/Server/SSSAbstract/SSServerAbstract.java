@@ -176,11 +176,22 @@ public abstract class SSServerAbstract implements SSServerInterface {
     }
 
     public static void sendAllServer(String mensaje) {
-        System.out.println("----------REPORTE DE SESSIONES--------");
-        for (Map.Entry me : SERVIDORES.entrySet()) {
-            SSServerAbstract server = SERVIDORES.get(me.getKey());
-            server.sendAll(mensaje);
-        }
+        System.out.println("---sendAllServer-----");
+        new Thread() {
+            @Override
+            public void run() {
+                for (Map.Entry me : SERVIDORES.entrySet()) {
+                    try {
+                        SSServerAbstract server = SERVIDORES.get(me.getKey());
+                        server.sendAll(mensaje);
+                    } catch (Exception e) {
+                        SConsole.error("Error al enviar al servidor", me.getKey());
+                    }
+
+                }
+            }
+        }.start();
+
     }
 
     public static void verSessiones() {
@@ -241,10 +252,15 @@ public abstract class SSServerAbstract implements SSServerInterface {
     }
 
     public void sendAll(String mensaje) {
-        System.out.println("----------REPORTE DE SESSIONES--------");
+        System.out.println("----------sendAll--------");
         for (Map.Entry me2 : sessiones.entrySet()) {
-            SSSessionAbstract session = sessiones.get(me2.getKey());
-            session.send(mensaje);
+            try {
+                SSSessionAbstract session = sessiones.get(me2.getKey());
+                session.send(mensaje);
+            } catch (Exception e) {
+                SConsole.error("Error al enviar a la session " + me2.getKey());
+            }
+
         }
     }
 }

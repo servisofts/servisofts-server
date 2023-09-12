@@ -57,26 +57,33 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
         return certClient;
     }
 
-    public void onMenssage(JSONObject data) {
-        data.put("id", getIdSession());
-        data.put("noSend", false);
-        // Router router = new Router(Router.TIPO_WS, this);
-        if (this.servicio != null) {
-            data.put("servicio", this.servicio);
-        }
-        String nombre = SConfig.getJSON().getString("nombre");
-        if (data.has("_sincrone_key_" + nombre)) {
-            String sincrone_key = data.getString("_sincrone_key_" + nombre);
-            SSSincSend.mapa.get(sincrone_key).onMesagge(data);
-        }
-        data = _Manejador.factory(data, this);
+    public void onMenssage(final JSONObject _data) {
+        final SSSessionAbstract INSTANCE = this;
+        new Thread() {
+            @Override
+            public void run() {
+                JSONObject data = _data;
+                data.put("id", getIdSession());
+                data.put("noSend", false);
+                // Router router = new Router(Router.TIPO_WS, this);
+                if (INSTANCE.servicio != null) {
+                    data.put("servicio", INSTANCE.servicio);
+                }
+                String nombre = SConfig.getJSON().getString("nombre");
+                if (data.has("_sincrone_key_" + nombre)) {
+                    String sincrone_key = data.getString("_sincrone_key_" + nombre);
+                    SSSincSend.mapa.get(sincrone_key).onMesagge(data);
+                }
+                data = _Manejador.factory(data, INSTANCE);
 
-        if (data.has("noSend")) {
-            if (data.getBoolean("noSend")) {
-                return;
+                if (data.has("noSend")) {
+                    if (data.getBoolean("noSend")) {
+                        return;
+                    }
+                }
+                send(data.toString());
             }
-        }
-        send(data.toString());
+        }.start();
 
         // data.remove("noSend");
 

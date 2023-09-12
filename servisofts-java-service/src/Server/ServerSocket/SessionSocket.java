@@ -120,7 +120,7 @@ public class SessionSocket extends SSSessionAbstract {
                                     obj.put("error", e.getLocalizedMessage());
                                     onError(obj);
                                     SConsole.error("Error en onMessage if e.getMessage() != null ");
-                                    e.printStackTrace();
+                                    // e.printStackTrace();
                                 } else {
                                     SConsole.error("Error en onMessage else ");
                                     isRun = false;

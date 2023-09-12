@@ -218,6 +218,7 @@ public class SPGConect {
         String funct = "update " + nombre_tabla + " set " + aux + " where key ='" + obj.getString("key") + "'";
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeUpdate();
+        ps.close(); // Agrege esto corrijiendo calistenia el 28 de agosto 2023
         return true;
     }
 
@@ -278,12 +279,20 @@ public class SPGConect {
     }
 
     public static void ejecutar(String consulta) {
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = con.prepareStatement(consulta);
-            ps.execute();
-            ps.close();
+            ps = con.prepareStatement(consulta);
+            ps.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace(); // Considera registrar o manejar adecuadamente esta excepción.
+                }
+            }
         }
     }
 
@@ -294,12 +303,20 @@ public class SPGConect {
     }
 
     public static void ejecutarUpdate(String consulta) {
+        PreparedStatement ps = null;
         try {
-            PreparedStatement ps = con.prepareStatement(consulta);
+            ps = con.prepareStatement(consulta);
             ps.executeUpdate();
-            ps.close();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace(); // Considera registrar o manejar adecuadamente esta excepción.
+                }
+            }
         }
     }
 

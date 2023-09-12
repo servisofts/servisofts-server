@@ -39,6 +39,8 @@ public class SessionSocketWeb extends SSSessionAbstract {
     public void onError(JSONObject obj) {
         // TODO Auto-generated method stub
         System.out.println("Error en la session socket Web ");
+        miSession.close();
+        super.onClose(obj);
     }
 
     @Override

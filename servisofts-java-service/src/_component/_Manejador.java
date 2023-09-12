@@ -31,7 +31,11 @@ public class _Manejador {
                     String service = data.getString("service");
                     data.remove("service");
                     // Cambie el send por sendSinc 20/jul/2022 2
-                    data = SocketCliente.sendSinc(service, data, 20000);
+                    int timeout = 20000;
+                    if (data.has("timeOut")) {
+                        timeout = data.getInt("timeOut");
+                    }
+                    data = SocketCliente.sendSinc(service, data, timeout);
                     if (data.has("servicio")) {
                         data.remove("servicio");
                     }
