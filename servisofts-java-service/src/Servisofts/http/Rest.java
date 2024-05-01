@@ -2,10 +2,13 @@ package Servisofts.http;
 
 import Servisofts.Servisofts;
 import Servisofts.http.Exception.HttpException;
+
+import java.io.BufferedReader;
 // import Servisofts.swagger.parts.Document;
 // import Servisofts.swagger.parts.Path;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -61,22 +64,25 @@ public abstract class Rest {
 
         t.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
         if (t.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-          t.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-          //algo
-          t.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
-          t.sendResponseHeaders(200, 0);
-          return;
+            t.getResponseHeaders().add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+            // algo
+            t.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+            t.sendResponseHeaders(200, 0);
+            return;
         }
         Response response = new Response();
+
         StringBuilder sb = new StringBuilder();
         try {
-            InputStream ios = t.getRequestBody();
-            int i;
-            while ((i = ios.read()) != -1) {
-                sb.append((char) i);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(t.getRequestBody(), "UTF-8"));
+            // InputStream ios = t.getRequestBody();
+            String i;
+            while ((i = bufferedReader.readLine()) != null) {
+                sb.append(i+"\n");
             }
 
             String data = sb.toString();
+            System.out.println();
             onMessage(t, data, response);
             ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
             byte[] bytes = new byte[buffer.remaining()];
