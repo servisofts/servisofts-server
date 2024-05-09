@@ -168,11 +168,16 @@ public abstract class SSServerAbstract implements SSServerInterface {
     }
 
     public static void sendServer(String tipo, String mensaje) {
-        SSServerAbstract servidor = SERVIDORES.get(tipo);
-        if (servidor != null) {
-            servidor.sendAll(mensaje);
-        }
-
+        System.out.println("---sendServer---- type: " + tipo);
+        new Thread() {
+            @Override
+            public void run() {
+                SSServerAbstract servidor = SERVIDORES.get(tipo);
+                if (servidor != null) {
+                    servidor.sendAll(mensaje);
+                }
+            }
+        }.start();
     }
 
     public static void sendAllServer(String mensaje) {
@@ -248,11 +253,14 @@ public abstract class SSServerAbstract implements SSServerInterface {
 
     public void setSession(SSSessionAbstract session) {
         this.sessiones.put(session.getIdSession(), session);
-        SConsole.info(session.getIdSession() + "\t|\t" + "New session connected to the '" + this.tipoServer + "'");
+        SConsole.info(session.getIdSession() + "\t|\t" + "New session connected to the '" + this.tipoServer
+                + "'   sessions: " + sessiones.entrySet().size());
     }
 
     public void sendAll(String mensaje) {
-        System.out.println("----------sendAll--------");
+        System.out
+                .println("----------sendAll-------- type: " + this.tipoServer + " sessions:"
+                        + sessiones.entrySet().size());
         for (Map.Entry me2 : sessiones.entrySet()) {
             try {
                 SSSessionAbstract session = sessiones.get(me2.getKey());
