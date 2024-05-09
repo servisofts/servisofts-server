@@ -73,6 +73,7 @@ public class SPGConect {
         return null;
     }
 
+
     public static void Transacction() {
         try {
             if (con.getAutoCommit()) {
