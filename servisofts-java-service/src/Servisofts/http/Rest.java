@@ -82,7 +82,10 @@ public abstract class Rest {
             }
 
             String data = sb.toString();
-            System.out.println();
+
+            t.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+
+            
             onMessage(t, data, response);
             ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
             byte[] bytes = new byte[buffer.remaining()];
@@ -99,6 +102,7 @@ public abstract class Rest {
         // os.close();
     }
 
+   
     private static void onMessage(
             HttpExchange t,
             String data,

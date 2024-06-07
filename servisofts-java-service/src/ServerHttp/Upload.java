@@ -18,7 +18,7 @@ import Servisofts.SConfig;
 public class Upload {
     public static void handleRequest(HttpExchange t) throws IOException {
         try {
-            DiskFileItemFactory d = new DiskFileItemFactory();
+             DiskFileItemFactory d = new DiskFileItemFactory();
             ServletFileUpload up = new ServletFileUpload(d);
             List<FileItem> items = up.parseRequest(new RequestContext() {
 

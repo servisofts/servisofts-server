@@ -137,6 +137,11 @@ public class Action {
 
     for (Parameter parameter : parameters) {
       Object value = null;
+
+      if(parameter.getType() == HttpExchange.class){
+        values.add(t);
+        continue;
+      }
       Annotation annotation = parameter.getAnnotation(PathVariable.class);
       if (annotation instanceof PathVariable) {
         i_p_v++;
@@ -155,6 +160,7 @@ public class Action {
         values.add(parseValue(data, parameter.getType()));
         continue;
       }
+   
       annotation = parameter.getAnnotation(RequestParam.class);
       if (annotation instanceof RequestParam) {
         RequestParam anot = (RequestParam) annotation;
