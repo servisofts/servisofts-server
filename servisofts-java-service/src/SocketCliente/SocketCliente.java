@@ -42,6 +42,7 @@ public class SocketCliente extends Thread {
             SConsole.error("No existe el servicio");
             return;
         }
+        
         new Thread() {
             @Override
             public void run() {
@@ -63,7 +64,14 @@ public class SocketCliente extends Thread {
                 JSONObject cert = new JSONObject();
                 cert.put("OU", servicio.getString("nombre"));
                 config.put("cert", cert);
-                Start(config);
+
+                
+                if(!Clientes.containsKey(config.getJSONObject("cert").getString("OU"))) {
+                    SConsole.log(servicio.getString("nombre"), "se conecto");
+                    Start(config);
+                } else {
+                    SConsole.log(servicio.getString("nombre"), "ya estaba conectado");
+                }
             }
         }.start();
 
@@ -182,8 +190,10 @@ public class SocketCliente extends Thread {
     private PrintWriter response;
     private BufferedReader request;
     public JSONObject config;
+    private Socket socket;
 
     public SocketCliente(JSONObject config, Socket socket) throws IOException {
+        this.socket = socket;
         response = new PrintWriter(socket.getOutputStream(), true);
         request = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         this.config = config;
@@ -311,4 +321,56 @@ public class SocketCliente extends Thread {
         Clientes.get(server).response.flush();
     }
 
+    public static void close(String server) {
+        // Cierra la conexion y delega al reconect
+        SocketCliente cliente = Clientes.get(server);
+        try {
+            try {
+                if (cliente.socket != null && !cliente.socket.isClosed()) {
+                    cliente.socket.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if (cliente.request != null) {
+                    cliente.request.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                if (cliente.response != null) {
+                    cliente.response.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+
+            cliente.Open = false;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(500); // espera
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void reconect(String server) {
+        SocketCliente cliente = Clientes.get(server);
+
+        close(server);
+
+        if (TReconnect != null) {
+            // delega la responsabilidad al reconect
+            return;
+        }
+
+        Start(cliente.config);
+    }
 }

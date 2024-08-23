@@ -7,7 +7,21 @@ import Servisofts.Servisofts;
 import SocketCliente.SocketCliente;
 
 public class _Manejador {
+
     public static JSONObject factory(JSONObject data, SSSessionAbstract sesion) {
+        return new _Manejador(data, sesion).manejar();
+    }
+
+    JSONObject data;
+    SSSessionAbstract sesion;
+
+    public _Manejador(JSONObject data, SSSessionAbstract sesion) {
+        this.data = data;
+        this.sesion = sesion;
+        // this.data = _Manejador.factory(this.data, this.sesion);
+    }
+
+    public JSONObject manejar() {
         try {
             if (!data.isNull("component")) {
 
@@ -18,6 +32,9 @@ public class _Manejador {
                             break;
                         case "usuario":
                             new _Usuario(data, sesion);
+                            break;
+                        case "test":
+                            new _Test(data, sesion);
                             break;
                     }
                 } catch (Exception e) {
@@ -56,4 +73,5 @@ public class _Manejador {
         }
         return data;
     }
+
 }

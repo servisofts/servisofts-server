@@ -82,6 +82,16 @@ public class SPGConectInstance {
       return newcon;
    }
 
+   public void close(){
+      try {
+         this.con.close();
+      } catch (SQLException e) {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      this.con = null;
+   }
+
    public void Transacction() {
       try {
          if (this.con.getAutoCommit()) {
@@ -166,7 +176,6 @@ public class SPGConectInstance {
                   case "character varying":
                      aux = aux + tupla.getString("column_name") + "='" + this.escapeEspecialChar(obj.getString(tupla.getString("column_name"))) + "',";
                      continue;
-                     break;
                   case "json[]":
                      if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
                         aux = aux + tupla.getString("column_name") + "= NULL,";
@@ -174,11 +183,9 @@ public class SPGConectInstance {
                         aux = aux + tupla.getString("column_name") + "='" + this.escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
                      }
                      continue;
-                     break;
                   case "double precision":
                      aux = aux + tupla.getString("column_name") + "=" + obj.getDouble(tupla.getString("column_name")) + ",";
                      continue;
-                     break;
                   case "json":
                      if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
                         aux = aux + tupla.getString("column_name") + "= NULL,";
@@ -186,7 +193,6 @@ public class SPGConectInstance {
                         aux = aux + tupla.getString("column_name") + "='" + this.escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
                      }
                      continue;
-                     break;
                   case "ARRAY":
                      if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
                         aux = aux + tupla.getString("column_name") + "= NULL,";
@@ -194,15 +200,12 @@ public class SPGConectInstance {
                         aux = aux + tupla.getString("column_name") + "='" + this.escapeEspecialChar(obj.get(tupla.getString("column_name")).toString()) + "',";
                      }
                      continue;
-                     break;
                   case "boolean":
                      aux = aux + tupla.getString("column_name") + "= " + obj.getBoolean(tupla.getString("column_name")) + " ,";
                      continue;
-                     break;
                   case "timestamp without time zone":
                      aux = aux + tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name")) + "',";
                      continue;
-                     break;
                   case "integer":
                      aux = aux + tupla.getString("column_name") + "=" + obj.getInt(tupla.getString("column_name")) + ",";
                      continue;
@@ -497,4 +500,15 @@ public class SPGConectInstance {
       }
 
    }
+
+   public boolean isLive() {
+      String consulta = "SELECT 1";
+      boolean isLive = false;
+      try {
+          isLive = ejecutarConsultaInt(consulta) == 1;
+      } catch (Exception e) {
+          
+      }
+      return isLive;
+  }
 }

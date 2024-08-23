@@ -27,3 +27,17 @@ public class App {
 ## Datos
 - Si la respuesta entra en el manejadorCliente con el dato "sendAll"  se realiza la accion ( SServerAbstract.sendAllServer())
 - Si la respuesta entra en el manejadorCliente con el dato "sendUsers"  se realiza la accion ( SServerAbstract.sendAllServer())
+
+
+
+
+
+
+## El metodo Download
+para descargar archivos se apunta al puerto 30xxx 
+
+http://localhost:30001/folder_name/folder_name/filename?
+    
+--Reques Header 
+    Range: bytes=0-1024
+    

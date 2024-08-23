@@ -15,30 +15,31 @@ public class MensajeSocket {
     public static Thread hilo;
 
     public static void run() {
-        if (hilo == null) {
-            hilo = new Thread() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
+        SConsole.warning("MensajeSocket run [DESCONTINUADO POR RENDIMIENTO]");
+        return;
+        // if (hilo == null) {
+        //     hilo = new Thread() {
+        //         @Override
+        //         public void run() {
+        //             while (true) {
+        //                 try {
 
-                            for (Map.Entry me : Mensajes.entrySet()) {
-                                MensajeSocket ms = Mensajes.get(me.getKey());
-                                if (ms.getEnvios().size() > 1) {
-                                    SConsole.log("El mensaje no a sido respondido en 1 intentos. ");
-                                    Mensajes.remove(me.getKey());
-                                }
-                                ms.getSession().send(ms.getMensaje(), ms);
-                            }
-                            sleep(2000);
-                        } catch (Exception e) {
-                            // TODO: handle exception
-                        }
-                    }
-                }
-            };
-            // hilo.start();
-        }
+        //                     for (Map.Entry me : Mensajes.entrySet()) {
+        //                         MensajeSocket ms = Mensajes.get(me.getKey());
+        //                         if (ms.getEnvios().size() > 1) {
+        //                             SConsole.log("El mensaje no a sido respondido en 1 intentos. ");
+        //                             Mensajes.remove(me.getKey());
+        //                         }
+        //                         ms.getSession().send(ms.getMensaje(), ms);
+        //                     }
+        //                     sleep(2000);
+        //                 } catch (Exception e) {
+        //                     // TODO: handle exception
+        //                 }
+        //             }
+        //         }
+        //     };
+        // }
     }
 
     public static void onMensaje(JSONObject data, SSSessionAbstract session) {

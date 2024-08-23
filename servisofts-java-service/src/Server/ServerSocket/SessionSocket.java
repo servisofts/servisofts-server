@@ -6,6 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.net.ssl.HandshakeCompletedEvent;
@@ -14,9 +20,11 @@ import org.json.JSONObject;
 import Server.MensajeSocket;
 import Server.SSSAbstract.SSSessionAbstract;
 import Servisofts.SConsole;
+import Servisofts.SUtil;
 
 public class SessionSocket extends SSSessionAbstract {
-
+    private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private javax.net.ssl.SSLSocket miSession;
     private PrintWriter outpw = null;
     private X509Certificate cer;
@@ -35,6 +43,7 @@ public class SessionSocket extends SSSessionAbstract {
         try {
             outpw = new PrintWriter(miSession.getOutputStream(), true);
             Start();
+            executor.submit(this::processQueue);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,6 +62,7 @@ public class SessionSocket extends SSSessionAbstract {
     @Override
     public void onClose(JSONObject obj) {
         try {
+            executor.shutdownNow();
             miSession.close();
             super.onClose(obj);
             // printLog("Conexion cerrada: ip = " + getIdSession() + " )");
@@ -68,17 +78,17 @@ public class SessionSocket extends SSSessionAbstract {
 
     @Override
     public void send(String mensaje) {
-        MensajeSocket mensajeSocket = new MensajeSocket(mensaje, this);
-        outpw.write(mensaje + "---SSkey---" + mensajeSocket.getKey() + "---SSofts---\n");
-        outpw.flush();
+        // MensajeSocket mensajeSocket = new MensajeSocket(mensaje, this);
+        messageQueue.offer(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---");
+
     }
 
-    @Override
-    public void send(String mensaje, MensajeSocket mensajeSocket) {
-        mensajeSocket.setEnvio();
-        outpw.write(mensaje + "---SSkey---" + mensajeSocket.getKey() + "---SSofts--\n");
-        outpw.flush();
-    }
+    // @Override
+    // public void send(String mensaje, MensajeSocket mensajeSocket) {
+    // mensajeSocket.setEnvio();
+    // outpw.write(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts--\n");
+    // outpw.flush();
+    // }
 
     public void Start() {
         try {
@@ -160,6 +170,35 @@ public class SessionSocket extends SSSessionAbstract {
             return false;
         }
         return true;
+    }
+
+    private void processQueue() {
+        while (true) {
+            try {
+                String mensaje = messageQueue.take();
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    try {
+                        // this.miSession.getRemote().sendString(mensaje);
+                        outpw.write(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---\n");
+                        outpw.flush();
+                    } catch (Exception e) {
+                        throw new CompletionException(e);
+                    }
+                });
+
+                future.whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        System.err.println("Failed to send message: " + ex.getMessage());
+                        // ex.printStackTrace();
+                    }
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

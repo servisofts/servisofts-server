@@ -16,11 +16,12 @@ public interface SSSessionInterface {
 
     public void send(String mensaje);
 
+
     public JSONObject sendSync(JSONObject mensaje);
 
     public JSONObject sendSync(JSONObject mensaje, int timeOut);
 
-    public void send(String mensaje, MensajeSocket mensajeSocket);
+    // public void send(String mensaje, MensajeSocket mensajeSocket);
 
     public void printLog(String mensaje);
 

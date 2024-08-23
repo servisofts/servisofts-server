@@ -15,6 +15,7 @@ import Server.SSSAbstract.SSServerAbstract;
 import Server.SSSAbstract.SSSessionAbstract;
 import Server.ServerSocket.ServerSocket;
 import Server.ServerSocketWeb.ServerSocketWeb;
+import ServerHttp.ImageCompressor;
 import ServerHttp.ServerHttp;
 import Servisofts.Regex;
 import Servisofts.SConfig;
@@ -22,6 +23,7 @@ import Servisofts.SConsole;
 import Servisofts.SLog;
 import Servisofts.SMyIp;
 import Servisofts.SSL;
+import Servisofts.Servisofts;
 import SocketCliente.SocketCliente;
 // import SocketServer.SocketServer;
 
@@ -59,6 +61,9 @@ public class _servicio {
                 case "getPem":
                     getPem(obj);
                     break;
+                case "comprimir":
+                    comprimir(obj);
+                    break;
 
             }
         }
@@ -92,16 +97,20 @@ public class _servicio {
         for (int i = 0; i < data.length(); i++) {
             JSONObject serhabilitado = data.getJSONObject(i);
             nombre = serhabilitado.getJSONObject("servicio").getString("nombre");
-            host = serhabilitado.getJSONObject("servicio").getString("ip") + ":"
-                    + serhabilitado.getJSONObject("servicio").getInt("puerto");
-            SocketCliente.servicios_habilitados.put(nombre,
-                    serhabilitado.getJSONObject("servicio"));
+            try {
+                host = serhabilitado.getJSONObject("servicio").getString("ip") + ":"
+                        + serhabilitado.getJSONObject("servicio").getInt("puerto");
+                SocketCliente.servicios_habilitados.put(nombre,
+                        serhabilitado.getJSONObject("servicio"));
 
-            SConsole.info( host+"\t"+nombre );
-            if (!serhabilitado.getJSONObject("servicio").getString("nombre").equals("servicio")) {
-                // SLog.put("Servicios." + nombre + ".host", host);
-                SLog.put("Servicios." + nombre , false);
-                SocketCliente.StartServicio(serhabilitado.getJSONObject("servicio").getString("nombre"));
+                SConsole.info( host+"\t"+nombre );
+                if (!serhabilitado.getJSONObject("servicio").getString("nombre").equals("servicio")) {
+                    // SLog.put("Servicios." + nombre + ".host", host);
+                    SLog.put("Servicios." + nombre , false);
+                    SocketCliente.StartServicio(serhabilitado.getJSONObject("servicio").getString("nombre"));
+                }
+            } catch (Exception e) {
+                SConsole.error("Error conectando Servicio", nombre, ": ", e.getMessage());
             }
         }
         SConsole.info("---------------------------------------------------");
@@ -110,15 +119,19 @@ public class _servicio {
     private void initServer(JSONObject obj, SSSessionAbstract sesion) {
 
         if (obj.getString("estado").equals("exito")) {
-            new ServerSocket(obj.getJSONObject("data").getInt("puerto"));
-            new ServerSocketWeb(obj.getJSONObject("data").getInt("puerto_ws"));
-            ServerHttp.Start(obj.getJSONObject("data").getInt("puerto_http"));
+            if(!Servisofts.isInitServer()) {
+                new ServerSocket(obj.getJSONObject("data").getInt("puerto"));
+                new ServerSocketWeb(obj.getJSONObject("data").getInt("puerto_ws"));
+                ServerHttp.Start(obj.getJSONObject("data").getInt("puerto_http"));
+                Servisofts.setInitServer(true);
+            }
             JSONObject objSend = new JSONObject();
             objSend.put("component", "servicio");
             objSend.put("type", "getServicioHabilitado");
             objSend.put("key", obj.getJSONObject("data").getString("key"));
             objSend.put("estado", "cargando");
             SocketCliente.send("servicio", objSend.toString());
+
         } else {
             SConsole.error("Socket Client,", "servicio,", obj.getString("type"), "\t|\t", obj.getString("error"));
             System.exit(0);
@@ -154,6 +167,7 @@ public class _servicio {
         data.put("fingerp", fingerp);
         JSONObject objSend = new JSONObject();
         if (obj.getString("socket").equals("servicio")) {
+            // Solo cuando me conecto con servicio
             objSend.put("component", "servicio");
             objSend.put("type", "initServer");
             objSend.put("data", data);
@@ -181,6 +195,24 @@ public class _servicio {
             SSL.registerPem(nombre, cert);
             SocketCliente.servicios_habilitados.getJSONObject(nombre).put("pem", nombre + ".pem");
         } catch (CertificateException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void comprimir(JSONObject obj) {
+        // System.out.println(obj.toString());
+
+        try {
+            String url = obj.getString("url");
+            //String url = "/u01/servisoftsFiles/tapeke";
+            //String url = "/u01/servisoftsFiles/tapeke_test/restaurant";
+            String[] skipFolders = {"gpx"};
+            SConsole.info("Comprimiendo a 128");
+            ImageCompressor.compress(url, true, false, true, 128, skipFolders);
+            SConsole.info("Comprimiendo a 512");
+            ImageCompressor.compress(url, true, false, true, 512, skipFolders);
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

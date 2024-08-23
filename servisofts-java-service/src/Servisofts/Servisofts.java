@@ -23,7 +23,9 @@ public class Servisofts {
 
     public static Manejador<JSONObject, SSSessionAbstract> Manejador;
     public static Manejador<JSONObject, JSONObject> ManejadorCliente;
+
     public static boolean DEBUG = true;
+    private static volatile boolean initServer = false;
 
     public static String VERSION = "1.0.1";
 
@@ -114,5 +116,13 @@ public class Servisofts {
         }
         SocketCliente.enableReconect(true);
         SocketCliente.Start(SConfig.getJSON("socket_client").getJSONObject("servicio"));
+    }
+
+    public synchronized static boolean isInitServer() {
+        return initServer;
+    }
+
+    public synchronized static void setInitServer(boolean initServer) {
+        Servisofts.initServer = initServer;
     }
 }

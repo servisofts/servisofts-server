@@ -13,6 +13,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.jboss.com.sun.net.httpserver.HttpExchange;
 
+import ServerHttp.Compressor.Compressor;
 import Servisofts.SConfig;
 
 public class Upload {
@@ -71,6 +72,8 @@ public class Upload {
                 }
                 file = new File(SConfig.getJSON("files").getString("url") + ruta + "/" + nombre);
                 copyInputStreamToFile(fi.getInputStream(), file);
+
+                Compressor.compress(file);
             }
 
             String response = "exito";

@@ -73,7 +73,6 @@ public class SPGConect {
         return null;
     }
 
-
     public static void Transacction() {
         try {
             if (con.getAutoCommit()) {
@@ -134,6 +133,105 @@ public class SPGConect {
             }
         }
         return output.toString();
+    }
+
+    public static boolean editObjectNull(String nombre_tabla, JSONObject obj) throws SQLException {
+
+        if (obj.isNull("key")) {
+            return false;
+        }
+
+        String consulta = "SELECT public.desc_tabla('" + nombre_tabla + "') as json";
+        JSONArray tabla = SPGConect.ejecutarConsultaArray(consulta);
+        JSONObject tupla;
+        String aux = "";
+        for (int i = 0; i < tabla.length(); i++) {
+            tupla = tabla.getJSONObject(i);
+            if (!tupla.getString("column_name").equals("key") && !tupla.getString("column_name").equals("key")
+            /*
+             * && !tupla.getString("column_name").equals("fecha_on")
+             * ** SE COMENTO EL 30/12/2022 Cuando se modificaba en histirico de almancen en
+             * el producto
+             **/) {
+                if (obj.has(tupla.getString("column_name"))) {
+
+                    if (obj.isNull(tupla.getString("column_name"))) {
+                        aux += tupla.getString("column_name") + "= null ,";
+                        continue;
+                    } else {
+                        switch (tupla.getString("data_type")) {
+                            case "character varying":
+                                aux += tupla.getString("column_name") + "='"
+                                        + escapeEspecialChar(obj.getString(tupla.getString("column_name")))
+                                        + "',";
+                                break;
+                            case "timestamp without time zone":
+                                aux += tupla.getString("column_name") + "='"
+                                        + obj.getString(tupla.getString("column_name"))
+                                        + "',";
+                                break;
+                            case "double precision":
+                                aux += tupla.getString("column_name") + "="
+                                        + obj.getDouble(tupla.getString("column_name"))
+                                        + ",";
+                                break;
+                            case "integer":
+                                aux += tupla.getString("column_name") + "=" + obj.getInt(tupla.getString("column_name"))
+                                        + ",";
+                                break;
+                            case "json":
+                                if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                    aux += tupla.getString("column_name") + "= NULL,";
+                                } else {
+                                    aux += tupla.getString("column_name") + "='"
+                                            + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString())
+                                            + "',";
+                                }
+                                break;
+                            case "json[]":
+                                if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                    aux += tupla.getString("column_name") + "= NULL,";
+                                } else {
+                                    aux += tupla.getString("column_name") + "='"
+                                            + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString())
+                                            + "',";
+                                }
+                                break;
+                            case "ARRAY":
+                                if (obj.get(tupla.getString("column_name")).toString().length() <= 0) {
+                                    aux += tupla.getString("column_name") + "= NULL,";
+                                } else {
+                                    aux += tupla.getString("column_name") + "='"
+                                            + escapeEspecialChar(obj.get(tupla.getString("column_name")).toString())
+                                            + "',";
+                                }
+                                break;
+                            case "boolean":
+                                aux += tupla.getString("column_name") + "= "
+                                        + obj.getBoolean(tupla.getString("column_name")) + " ,";
+                                break;
+                            default:
+                                aux += tupla.getString("column_name") + "='"
+                                        + escapeEspecialChar(obj.getString(tupla.getString("column_name")))
+                                        + "',";
+                                break;
+                        }
+                    }
+                }
+            }
+
+        }
+        if (aux.length() == 0) {
+            return false;
+        }
+
+        aux = aux.substring(0, aux.length() - 1);
+
+        String funct = "update " + nombre_tabla + " set " + aux + " where key ='" + obj.getString("key") + "'";
+        PreparedStatement ps = con.prepareStatement(funct);
+        ps.executeUpdate();
+        ps.close(); // Agrege esto corrijiendo calistenia el 28 de agosto 2023
+        return true;
     }
 
     public static boolean editObject(String nombre_tabla, JSONObject obj) throws SQLException {
@@ -239,6 +337,15 @@ public class SPGConect {
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + json.toString() + "')) RETURNING key";
         PreparedStatement ps = con.prepareStatement(funct);
+        ps.executeQuery();
+        ps.close();
+    }
+
+    public static void insertArray2(String nombre_tabla, JSONArray json) throws SQLException {
+        String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
+                + ", ?::json)) RETURNING key";
+        PreparedStatement ps = con.prepareStatement(funct);
+        ps.setString(1, json.toString());
         ps.executeQuery();
         ps.close();
     }
@@ -482,4 +589,43 @@ public class SPGConect {
             e.printStackTrace();
         }
     }
+
+    public static boolean isLive() {
+        String consulta = "SELECT 1";
+        boolean isLive = false;
+        try {
+            isLive = ejecutarConsultaInt(consulta) == 1;
+        } catch (Exception e) {
+            
+        }
+        return isLive;
+    }
+
+    public static void desconectar() {
+        try {
+            if (con != null) {
+                con.close();
+            }
+        } catch (Exception e) {
+
+        }
+        String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
+        SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" + contrasena, "desconectado :(");
+        SLog.put("PostgreSQL.status", "desconectado");
+    }
+
+    public static boolean restartConexion(boolean forzar) {
+        if(forzar || !isLive()) {
+            desconectar();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+            }
+            conectar();
+        }
+
+        return isLive();
+    }
+
+
 }
