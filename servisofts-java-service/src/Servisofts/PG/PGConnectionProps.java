@@ -1,8 +1,9 @@
 package Servisofts.PG;
+import org.json.JSONObject;
 
 public class PGConnectionProps {
 
-    public static PGConnectionProps buildFromJson() {
+    public static PGConnectionProps buildFromJson(JSONObject obj) {
         return new PGConnectionProps("localhost", 5432, "bd_name", "user", "pass");
     }
 
