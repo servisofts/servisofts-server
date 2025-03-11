@@ -72,6 +72,8 @@ public class SPG {
         for (int i = 0; i < params.length; i++) {
             content= content.replaceAll("\\$" + (i + 1), params[i]);
         }
+        // SConsole.info("executeFile", content);
+
         PreparedStatement ps = SPGConect.preparedStatement(content);
         ResultSet rs = ps.executeQuery();
 

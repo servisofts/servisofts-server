@@ -29,7 +29,7 @@ import SocketCliente.SocketCliente;
 
 public class _servicio {
 
-    // public static HashMap<String, SSSessionAbstract> services_sessions = new
+    public static JSONObject ServiciosConocidos = new JSONObject();
     // HashMap<>();
 
     public _servicio(JSONObject obj, SSSessionAbstract sesion) {
@@ -72,9 +72,12 @@ public class _servicio {
     private void getEstadoServicio(JSONObject obj, SSSessionAbstract sesion) {
         if (obj.getString("estado").equals("error")) {
             SConsole.error("ERROR EN EL ESTADO DEL SERVICIO ", obj.getString("error"));
+            // sesion.onClose(obj);
             return;
         }
         JSONObject servicio = obj.getJSONObject("data");
+        // SConsole.warning("Servicio conocido insertado", servicio);
+        ServiciosConocidos.put(servicio.getString("nombre"), servicio);
         SSServerAbstract.getSession(obj.getString("id_session")).setServicio(servicio);
         obj.put("component", "servicio");
         obj.put("socket", "usuario");
@@ -103,10 +106,10 @@ public class _servicio {
                 SocketCliente.servicios_habilitados.put(nombre,
                         serhabilitado.getJSONObject("servicio"));
 
-                SConsole.info( host+"\t"+nombre );
+                SConsole.info(host + "\t" + nombre);
                 if (!serhabilitado.getJSONObject("servicio").getString("nombre").equals("servicio")) {
                     // SLog.put("Servicios." + nombre + ".host", host);
-                    SLog.put("Servicios." + nombre , false);
+                    SLog.put("Servicios." + nombre, false);
                     SocketCliente.StartServicio(serhabilitado.getJSONObject("servicio").getString("nombre"));
                 }
             } catch (Exception e) {
@@ -119,7 +122,7 @@ public class _servicio {
     private void initServer(JSONObject obj, SSSessionAbstract sesion) {
 
         if (obj.getString("estado").equals("exito")) {
-            if(!Servisofts.isInitServer()) {
+            if (!Servisofts.isInitServer()) {
                 new ServerSocket(obj.getJSONObject("data").getInt("puerto"));
                 new ServerSocketWeb(obj.getJSONObject("data").getInt("puerto_ws"));
                 ServerHttp.Start(obj.getJSONObject("data").getInt("puerto_http"));
@@ -143,17 +146,29 @@ public class _servicio {
             String name = obj.getJSONObject("info").getJSONObject("cert").getString("OU");
             SConsole.succes("SERVER INICIADO:\t\t" + name);
             // SLog.put("Servicios." + name + ".status", "exito");
-            SLog.put("Servicios." + name , true);
+            SLog.put("Servicios." + name, true);
             return;
         }
         SConsole.succes("Indentificado como: " + obj.getString("id") + " - " + obj.getJSONObject("data").toString());
         JSONObject data = obj.getJSONObject("data");
+        String OU = data.getJSONObject("cert").getString("OU");
+
         JSONObject objSend = new JSONObject();
         objSend.put("component", "servicio");
         objSend.put("type", "getEstadoServicio");
         objSend.put("data", data);
         objSend.put("id_session", sesion.getIdSession());
         objSend.put("estado", "cargando");
+
+        if (ServiciosConocidos.has(OU)) {
+            SConsole.warning("Se inicio un servicio conocido para evitar ir a servicio intentando resolver el error de desconeccion", OU);
+            objSend.put("data", ServiciosConocidos.getJSONObject(OU));
+            objSend.put("estado", "exito");
+            getEstadoServicio(objSend, sesion);
+            obj.put("noSend", true);
+            return;
+
+        }
         SocketCliente.send("servicio", objSend, sesion);
         obj.put("noSend", true);
     }
@@ -205,9 +220,27 @@ public class _servicio {
 
         try {
             String url = obj.getString("url");
-            //String url = "/u01/servisoftsFiles/tapeke";
-            //String url = "/u01/servisoftsFiles/tapeke_test/restaurant";
-            String[] skipFolders = {"gpx"};
+            // String url = "/u01/servisoftsFiles/tapeke";
+            // String url = "/u01/servisoftsFiles/tapeke_test/restaurant";
+            String[] skipFolders = { "gpx" };
+            SConsole.info("Comprimiendo a 128");
+            ImageCompressor.compress(url, true, false, true, 128, skipFolders);
+            SConsole.info("Comprimiendo a 512");
+            ImageCompressor.compress(url, true, false, true, 512, skipFolders);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void comprimir2(JSONObject obj) {
+        // System.out.println(obj.toString());
+
+        try {
+            String url = obj.getString("url");
+            // String url = "/u01/servisoftsFiles/tapeke";
+            // String url = "/u01/servisoftsFiles/tapeke_test/restaurant";
+            String[] skipFolders = { "gpx" };
             SConsole.info("Comprimiendo a 128");
             ImageCompressor.compress(url, true, false, true, 128, skipFolders);
             SConsole.info("Comprimiendo a 512");

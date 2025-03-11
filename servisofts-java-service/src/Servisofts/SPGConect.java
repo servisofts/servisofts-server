@@ -263,6 +263,10 @@ public class SPGConect {
                             aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
                                     + "',";
                             break;
+                        case "timestamp with time zone":
+                            aux += tupla.getString("column_name") + "='" + obj.getString(tupla.getString("column_name"))
+                                    + "',";
+                            break;
                         case "double precision":
                             aux += tupla.getString("column_name") + "=" + obj.getDouble(tupla.getString("column_name"))
                                     + ",";
@@ -326,16 +330,20 @@ public class SPGConect {
     }
 
     public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
+        String dataStr = (new JSONArray().put(json)).toString().replace("\\", "\\\\") // Escapa backslashes
+                .replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
-                + ", '" + (new JSONArray().put(json)).toString() + "')) RETURNING key";
+                + ", '" + dataStr + "')) RETURNING key";
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeQuery();
         ps.close();
     }
 
     public static void insertArray(String nombre_tabla, JSONArray json) throws SQLException {
+        String dataStr = json.toString().replace("\\", "\\\\") // Escapa backslashes
+                .replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
-                + ", '" + json.toString() + "')) RETURNING key";
+                + ", '" + dataStr + "')) RETURNING key";
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeQuery();
         ps.close();
@@ -596,7 +604,7 @@ public class SPGConect {
         try {
             isLive = ejecutarConsultaInt(consulta) == 1;
         } catch (Exception e) {
-            
+
         }
         return isLive;
     }
@@ -615,7 +623,7 @@ public class SPGConect {
     }
 
     public static boolean restartConexion(boolean forzar) {
-        if(forzar || !isLive()) {
+        if (forzar || !isLive()) {
             desconectar();
             try {
                 Thread.sleep(100);
@@ -626,6 +634,5 @@ public class SPGConect {
 
         return isLive();
     }
-
 
 }

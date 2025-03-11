@@ -39,10 +39,10 @@ public class SocketCliente extends Thread {
 
     public static void StartServicio(String nombre) {
         if (!servicios_habilitados.has(nombre)) {
-            SConsole.error("No existe el servicio");
+            SConsole.error("No existe el servicio entre los servicios_habilitados", nombre);
             return;
         }
-        
+
         new Thread() {
             @Override
             public void run() {
@@ -65,8 +65,7 @@ public class SocketCliente extends Thread {
                 cert.put("OU", servicio.getString("nombre"));
                 config.put("cert", cert);
 
-                
-                if(!Clientes.containsKey(config.getJSONObject("cert").getString("OU"))) {
+                if (!Clientes.containsKey(config.getJSONObject("cert").getString("OU"))) {
                     SConsole.log(servicio.getString("nombre"), "se conecto");
                     Start(config);
                 } else {
@@ -78,15 +77,16 @@ public class SocketCliente extends Thread {
     }
 
     public static SSLContext ss;
-    public static SSLSocketFactory ssf ;
+    public static SSLSocketFactory ssf;
 
-    public static SSLSocketFactory getSocketFactory(){
-        if(ssf==null){
-            ss =  SSL.getSSLContext();
+    public static SSLSocketFactory getSocketFactory() {
+        if (ssf == null) {
+            ss = SSL.getSSLContext();
             ssf = ss.getSocketFactory();
         }
         return ssf;
     }
+
     public static void Start(JSONObject config) {
         if (Servisofts.DEBUG) {
             SConsole.warning("**Conectando con 'servisofts." + config.getJSONObject("cert").getString("OU")
@@ -102,7 +102,7 @@ public class SocketCliente extends Thread {
             s.startHandshake();
             // INICIA LA CONEXION AL SOCKET new SocketCliete(config);
             // if (config.getInt("puerto") == 10001) {
-                new SocketCliente(config, s);
+            new SocketCliente(config, s);
             // }
 
         } catch (Exception e) {
@@ -306,7 +306,27 @@ public class SocketCliente extends Thread {
     }
 
     public static JSONObject sendSinc(String server, JSONObject obj, int timeOut) {
-        return new SCSincroneSend(Clientes.get(server), timeOut).send(obj);
+        try {
+            SocketCliente sc = SocketCliente.Clientes.get(server);
+            return new SCSincroneSend(sc, timeOut).send(obj);    
+        } catch (Exception e) {
+            e.printStackTrace();
+            // try {
+            //     SConsole.error("[error sendsinc]", "server", server);
+            //     SConsole.error("[error sendsinc]", "Clientes", Clientes.keySet().toArray().toString());
+            //     SConsole.error("[error sendsinc]", "ConexinesFallidas", ConexinesFallidas.keySet().toArray().toString());
+            //     SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL", ConexinesFallidasNoSSL.keySet().toArray().toString());    
+            //     SConsole.error("[error sendsinc]", "Clientes", new ArrayList<>(Clientes.keySet()).toString());
+            //     SConsole.error("[error sendsinc]", "ConexinesFallidas", new ArrayList<>(ConexinesFallidas.keySet()).toString());
+            //     SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL", new ArrayList<>(ConexinesFallidasNoSSL.keySet()).toString());    
+            // } catch (Exception e1) {
+            //     // TODO: handle exception
+            // }
+            
+            obj.put("estado", "error");
+            obj.put("error", e.getMessage());
+            return obj;
+        }
     }
 
     public static void send(String server, JSONObject data, SSSessionAbstract session) {
@@ -322,8 +342,12 @@ public class SocketCliente extends Thread {
     }
 
     public static void close(String server) {
+        SConsole.warning("SocketCliente", "Entro al close", server);
         // Cierra la conexion y delega al reconect
         SocketCliente cliente = Clientes.get(server);
+        if (cliente == null) {
+            return;
+        }
         try {
             try {
                 if (cliente.socket != null && !cliente.socket.isClosed()) {
@@ -346,10 +370,9 @@ public class SocketCliente extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            
 
             cliente.Open = false;
-    
+
         } catch (Exception e) {
             e.printStackTrace();
         }

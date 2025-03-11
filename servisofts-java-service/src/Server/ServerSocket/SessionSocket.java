@@ -51,12 +51,18 @@ public class SessionSocket extends SSSessionAbstract {
 
     @Override
     public void onMessage(String mensaje) {
-        JSONObject data = new JSONObject(mensaje);
-        new Thread() {
-            public void run() {
-                onMenssage(data);
-            };
-        }.start();
+        try {
+            SConsole.log("Recivio mensaje", mensaje.length());
+            JSONObject data = new JSONObject(mensaje);
+            new Thread() {
+                public void run() {
+                    onMenssage(data);
+                };
+            }.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

@@ -13,13 +13,17 @@ import Servisofts.SConsole;
 public class Compressor {
 
     public static void compress(File file) {
+        Compressor.compress(file, false);
+    }
+
+    public static void compress(File file, boolean force) {
         String mime;
         try {
             mime = getMimeType(file);
             SConsole.info("mime", mime);
-            if (mime!=null && mime.indexOf("video") > -1) {
+            if (mime != null && mime.indexOf("video") > -1) {
                 try {
-                     VideoCompressor.createMiniature(file);
+                    VideoCompressor.createMiniature(file);
                     // VideoCompressor.convertMOVtoMP4(SConfig.getJSON("files").getString("url") +
                     // ruta + "/" + fileName, SConfig.getJSON("files").getString("url") + ruta + "/"
                     // + fileName+".mp4");
@@ -32,7 +36,7 @@ public class Compressor {
                 return;
             }
 
-            if (mime!=null && mime.indexOf("application/pdf") > -1) {
+            if (mime != null && mime.indexOf("application/pdf") > -1) {
                 try {
                     PDFPreview.createMiniature(file);
                 } catch (Exception e) {
@@ -41,20 +45,25 @@ public class Compressor {
                 return;
             }
 
-            ImageCompressor.compress(file.getPath(), false, true, 512);
-            ImageCompressor.compress(file.getPath(), false, true, 128);
+            if (force==true || (mime != null && mime.indexOf("image") > -1)) {
+                try {
+                    ImageCompressor.compress(file.getPath(), false, true, 512);
+                    ImageCompressor.compress(file.getPath(), false, true, 128);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
 
         } catch (IOException e) {
-                
+
             e.printStackTrace();
         }
     }
-
 
     public static String getMimeType(java.io.File file) throws IOException {
         Path path = Paths.get(file.getAbsolutePath());
         return Files.probeContentType(path);
     }
 
-    
 }

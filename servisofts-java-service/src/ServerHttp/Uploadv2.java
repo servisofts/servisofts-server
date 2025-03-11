@@ -56,11 +56,12 @@ public class Uploadv2 implements HttpHandler {
                 }
             }
             ruta = ruta.substring(0, ruta.length() - 1);
-
+            System.out.println("ruta"+ruta);
             String query = exchange.getRequestURI().getQuery();
             String[] queryParams = query.split("&");
             int chunkNumber = -1;
             int totalChunks = -1;
+            long lastModified = -1;
 
             for (String param : queryParams) {
                 String[] keyValue = param.split("=");
@@ -70,6 +71,9 @@ public class Uploadv2 implements HttpHandler {
                         break;
                     case "totalChunks":
                         totalChunks = Integer.parseInt(keyValue[1]);
+                        break;
+                    case "lastModified":
+                        lastModified = Long.parseLong(keyValue[1]); // Capturar la fecha de modificación
                         break;
                 }
             }
@@ -101,8 +105,12 @@ public class Uploadv2 implements HttpHandler {
             os.close();
             is.close();
 
+            if(lastModified>0){
+                file.setLastModified(lastModified);
+            }
+            
             if (chunkNumber == totalChunks - 1) {
-                combineChunks(ruta, nombre, totalChunks);
+                combineChunks(ruta, nombre, totalChunks, lastModified);
             }
 
             String response = "Chunk " + chunkNumber + " uploaded successfully.";
@@ -121,7 +129,7 @@ public class Uploadv2 implements HttpHandler {
         return Files.probeContentType(path);
     }
 
-    private void combineChunks(String ruta, String fileName, int totalChunks) throws IOException {
+    private void combineChunks(String ruta, String fileName, int totalChunks, long lastModified) throws IOException {
         File outputFile = new File(SConfig.getJSON("files").getString("url") + ruta + "/" + fileName);
         if (outputFile.exists()) {
             outputFile.delete();
@@ -147,6 +155,9 @@ public class Uploadv2 implements HttpHandler {
         }
         os.close();
 
+        if(lastModified>0){
+            outputFile.setLastModified(lastModified);
+        }
         Compressor.compress(outputFile);
         /*
         String mime = getMimeType(outputFile);

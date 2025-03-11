@@ -45,7 +45,7 @@ public class SSSincSend {
         String nombre = SConfig.getJSON().getString("nombre");
 
         obj.put("_sincrone_key_" + nombre, key);
-        mapa.put(key, this);
+        SSSincSend.mapa.put(key, this);
         cli.send(obj.toString());
         isRun = true;
         while (isRun) {

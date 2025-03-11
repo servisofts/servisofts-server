@@ -31,6 +31,7 @@ public class _Usuario {
         try {
             session.setKeyDevice(deviceKey);
             session.setKeyUsuario(data.getString("key"));
+            session.setTimeZone(obj.optInt("timeZone",-240));
             SConsole.info(session.getIdSession() + "\t|\t" + "Session identified with user=(" + data.getString("key")
                     + ") device=(" + deviceKey + ") ");
         } catch (Exception e) {

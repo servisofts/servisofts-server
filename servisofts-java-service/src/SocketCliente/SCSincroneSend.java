@@ -5,6 +5,7 @@ import java.util.HashMap;
 import org.json.JSONObject;
 
 import Servisofts.SConfig;
+import Servisofts.SConsole;
 import Servisofts.SUtil;
 
 public class SCSincroneSend {

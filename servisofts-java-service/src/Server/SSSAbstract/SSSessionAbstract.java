@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import Server.SSSInterface.SSSessionInterface;
 import Servisofts.SConfig;
+import Servisofts.SConsole;
 import _component._Manejador;
 
 public abstract class SSSessionAbstract implements SSSessionInterface {
@@ -13,6 +14,7 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
     private X509Certificate certClient;
     private String idSession;
     private String keyUsuario;
+    private int timeZone = 0;
     private String keyDevice;
 
     private JSONObject usuario;
@@ -67,6 +69,9 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
                 data.put("noSend", false);
                 // Router router = new Router(Router.TIPO_WS, this);
                 if (INSTANCE.servicio != null) {
+                    if (INSTANCE.servicio.getString("nombre").equals("tapeke")) {
+                        SConsole.log("Mensaje entrante de tapeke");
+                    }
                     data.put("servicio", INSTANCE.servicio);
                 }
                 String nombre = SConfig.getJSON().getString("nombre");
@@ -103,6 +108,14 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
 
     public String getKeyUsuario() {
         return keyUsuario;
+    }
+
+    public int getTimeZone() {
+        return this.timeZone;
+    }
+
+    public void setTimeZone(int timeZone) {
+        this.timeZone = timeZone;
     }
 
     public void setUsuario(JSONObject usuario) {

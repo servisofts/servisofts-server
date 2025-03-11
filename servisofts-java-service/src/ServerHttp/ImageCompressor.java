@@ -277,6 +277,7 @@ public class ImageCompressor {
                         resizeAndCompressImage(f, fOut, size, size, 0.8f);
 
                         long totalSpaceOutMB = fOut.length() / (1024);
+                        fOut.setLastModified(f.lastModified());
                         System.out.println(fOut.getAbsolutePath() + " --> " + totalSpaceOutMB+" kb");
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -19,7 +19,7 @@ import Servisofts.SConfig;
 public class Upload {
     public static void handleRequest(HttpExchange t) throws IOException {
         try {
-             DiskFileItemFactory d = new DiskFileItemFactory();
+            DiskFileItemFactory d = new DiskFileItemFactory();
             ServletFileUpload up = new ServletFileUpload(d);
             List<FileItem> items = up.parseRequest(new RequestContext() {
 
@@ -73,7 +73,7 @@ public class Upload {
                 file = new File(SConfig.getJSON("files").getString("url") + ruta + "/" + nombre);
                 copyInputStreamToFile(fi.getInputStream(), file);
 
-                Compressor.compress(file);
+                Compressor.compress(file, true);
             }
 
             String response = "exito";
