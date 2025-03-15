@@ -1,0 +1,35 @@
+#!/bin/bash
+
+bashpath=$(dirname "$(readlink -f "$0")")
+currentPath=$(pwd)
+
+echo "bashpath: $bashpath"
+echo "currentPath: $currentPath"
+
+# Verificar si en la ruta actual hay una carpeta llamada "src"
+if [[ -d "$currentPath/src" ]]; then
+    parentFolder=$(basename "$currentPath")
+    echo "Se encontró la carpeta 'src' en: $currentPath"
+    echo "Nombre de la carpeta contenedora: $parentFolder"
+else
+    echo "No se encontró una carpeta 'src' en $currentPath"
+fi
+
+# Verificar si en la ruta actual hay una carpeta llamada "lib"
+if [[ -d "$currentPath/lib" ]]; then
+    echo "Se encontró la carpeta 'lib' en: $currentPath"
+else
+    echo "No se encontró una carpeta 'lib' en $currentPath"
+fi
+
+bashpath_parent=$(dirname "$bashpath")
+ln -s "$bashpath_parent/lib" "$currentPath/lib/lib"
+ln -s "$bashpath_parent/src/Servisofts" "$currentPath/src/Servisofts"
+# echo "bashpath sin el último directorio: $bashpath_parent"
+
+
+
+
+# echo $ROUTE_SS
+# ln -s "$ROUTE_SS/lib" "$ROUTE_TO/lib/lib"
+# ln -s "$ROUTE_SS/src/_component" "$ROUTE_TO/src/_component"

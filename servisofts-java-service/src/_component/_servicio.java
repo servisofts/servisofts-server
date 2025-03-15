@@ -159,11 +159,17 @@ public class _servicio {
         objSend.put("data", data);
         objSend.put("id_session", sesion.getIdSession());
         objSend.put("estado", "cargando");
+        if(obj.has("_sincrone_key_" + OU)){
+            objSend.put("_sincrone_key_" + OU, obj.optString("_sincrone_key_" + OU));
+        }
 
         if (ServiciosConocidos.has(OU)) {
-            SConsole.warning("Se inicio un servicio conocido para evitar ir a servicio intentando resolver el error de desconeccion", OU);
+            SConsole.warning(
+                    "Se inicio un servicio conocido para evitar ir a servicio intentando resolver el error de desconeccion",
+                    OU);
             objSend.put("data", ServiciosConocidos.getJSONObject(OU));
             objSend.put("estado", "exito");
+      
             getEstadoServicio(objSend, sesion);
             obj.put("noSend", true);
             return;

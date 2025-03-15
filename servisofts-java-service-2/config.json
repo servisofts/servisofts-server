@@ -1,0 +1,38 @@
+{
+    "ss": "servisofts.test",
+    "socket_client": {
+        "servicio": {
+            "puerto": 10001,
+            "ip": "192.168.2.1",
+            "cert": {
+                "OU": "servicio",
+                "pem": "servicio.pem"
+            }
+        },
+        "reconectTime": 5000
+    },
+    "files":{
+        "url":"/u01/servisoftsFiles/test/"
+    },
+    "data_base": {
+        "puerto": 5432,
+        "pass": "postgres",
+        "ip": "192.168.5.16",
+        "bd_name": "servisofts.roles_permisos",
+        "user": "postgres"
+    },
+    "nombre": "test",
+    "ssl": {
+        "pass_jks": "Servisofts123.",
+        "cert": {
+            "ST": "Av Banzer",
+            "C": "BO",
+            "E": "ricky.paz.d.97@gmail.com",
+            "OU": "test",
+            "CN": "test.servisofts.com",
+            "L": "Santa Cruz",
+            "O": "Servisofts SRL"
+        },
+        "nombre_jks": "servisofts"
+    }
+}

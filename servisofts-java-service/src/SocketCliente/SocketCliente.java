@@ -308,21 +308,27 @@ public class SocketCliente extends Thread {
     public static JSONObject sendSinc(String server, JSONObject obj, int timeOut) {
         try {
             SocketCliente sc = SocketCliente.Clientes.get(server);
-            return new SCSincroneSend(sc, timeOut).send(obj);    
+            return new SCSincroneSend(sc, timeOut).send(obj);
         } catch (Exception e) {
             e.printStackTrace();
             // try {
-            //     SConsole.error("[error sendsinc]", "server", server);
-            //     SConsole.error("[error sendsinc]", "Clientes", Clientes.keySet().toArray().toString());
-            //     SConsole.error("[error sendsinc]", "ConexinesFallidas", ConexinesFallidas.keySet().toArray().toString());
-            //     SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL", ConexinesFallidasNoSSL.keySet().toArray().toString());    
-            //     SConsole.error("[error sendsinc]", "Clientes", new ArrayList<>(Clientes.keySet()).toString());
-            //     SConsole.error("[error sendsinc]", "ConexinesFallidas", new ArrayList<>(ConexinesFallidas.keySet()).toString());
-            //     SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL", new ArrayList<>(ConexinesFallidasNoSSL.keySet()).toString());    
+            // SConsole.error("[error sendsinc]", "server", server);
+            // SConsole.error("[error sendsinc]", "Clientes",
+            // Clientes.keySet().toArray().toString());
+            // SConsole.error("[error sendsinc]", "ConexinesFallidas",
+            // ConexinesFallidas.keySet().toArray().toString());
+            // SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL",
+            // ConexinesFallidasNoSSL.keySet().toArray().toString());
+            // SConsole.error("[error sendsinc]", "Clientes", new
+            // ArrayList<>(Clientes.keySet()).toString());
+            // SConsole.error("[error sendsinc]", "ConexinesFallidas", new
+            // ArrayList<>(ConexinesFallidas.keySet()).toString());
+            // SConsole.error("[error sendsinc]", "ConexinesFallidasNoSSL", new
+            // ArrayList<>(ConexinesFallidasNoSSL.keySet()).toString());
             // } catch (Exception e1) {
-            //     // TODO: handle exception
+            // // TODO: handle exception
             // }
-            
+
             obj.put("estado", "error");
             obj.put("error", e.getMessage());
             return obj;

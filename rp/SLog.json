@@ -1,0 +1,8 @@
+{
+  "PostgreSQL": {
+    "host": "jdbc:postgresql://192.168.5.16:5432/servisofts.roles_permisos",
+    "status": "desconectado"
+  },
+  "- SLog": "RealTime Log from server Servisofts",
+  "- Fecha": "2025-03-11T18:08:24.514-04:00"
+}
