@@ -38,8 +38,8 @@ public class SPGConect {
         puerto = data_base.getInt("puerto") + "";
         usuario = data_base.getString("user");
         contrasena = data_base.getString("pass");
-        SLog.put("PostgreSQL.status", "desconectado");
-        SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name);
+        // SLog.put("PostgreSQL.status", "desconectado");
+        // SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name);
         // SLog.put("PostgreSQL.user", usuario);
         // SLog.put("PostgreSQL.password",
         // contrasena.substring(0, 4) + contrasena.substring(4,
@@ -352,8 +352,7 @@ public class SPGConect {
     }
 
     public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
-        String dataStr = (new JSONArray().put(json)).toString().replace("\\", "\\\\") // Escapa backslashes
-                .replace("'", "''"); // Escapa comillas simples (SQL-safe)
+        String dataStr = (new JSONArray().put(json)).toString().replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + dataStr + "')) RETURNING key";
         Connection con = SPGConect.pool.getConnection();
@@ -364,8 +363,7 @@ public class SPGConect {
     }
 
     public static void insertArray(String nombre_tabla, JSONArray json) throws SQLException {
-        String dataStr = json.toString().replace("\\", "\\\\") // Escapa backslashes
-                .replace("'", "''"); // Escapa comillas simples (SQL-safe)
+        String dataStr = json.toString().replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + dataStr + "')) RETURNING key";
         Connection con = SPGConect.pool.getConnection();
@@ -655,7 +653,7 @@ public class SPGConect {
         }
         String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
         SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" + contrasena, "desconectado :(");
-        SLog.put("PostgreSQL.status", "desconectado");
+        // SLog.put("PostgreSQL.status", "desconectado");
     }
 
     public static boolean restartConexion(boolean forzar) {
