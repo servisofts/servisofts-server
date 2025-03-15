@@ -48,7 +48,7 @@ public class Servisofts {
         if (!SConfig.getJSON("ssl").getJSONObject("cert").getString("OU").equals("servicio")) {
             initServicioCert();
         }
-
+        
         initSPGConect();
         initSocketClient();
 

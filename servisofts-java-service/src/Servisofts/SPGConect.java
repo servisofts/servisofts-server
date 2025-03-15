@@ -16,6 +16,9 @@ import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import Servisofts.PG.PGConnectionProps;
+import Servisofts.PG.PGPool;
+
 public class SPGConect {
 
     private static Connection con;
@@ -27,9 +30,7 @@ public class SPGConect {
     private static String ruta_pg_dump;
     private static String ruta_pg_restore;
 
-    public static Connection getConexion() {
-        return conectar();
-    }
+    public static PGPool pool;
 
     public static Connection setConexion(JSONObject data_base) {
         ip = data_base.getString("ip");
@@ -43,36 +44,52 @@ public class SPGConect {
         // SLog.put("PostgreSQL.password",
         // contrasena.substring(0, 4) + contrasena.substring(4,
         // contrasena.length()).replaceAll(".", "*"));
-        return conectar();
 
-    }
-
-    private static Connection conectar() {
-        String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
         try {
-            Class.forName("org.postgresql.Driver");
-            if (con != null) {
-                if (!con.isClosed()) {
-                    return con;
-                }
-            }
-            if (Servisofts.DEBUG) {
-                SConsole.warning("Initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
-            }
-            con = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name, usuario,
-                    contrasena);
-
-            SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" + contrasena, "ready!");
-            SLog.put("PostgreSQL.status", "exito");
-            // restore_backup();
-            // save_backup();
-            return con;
-        } catch (Exception e) {
-            SLog.put("PostgreSQL.status", "desconectado");
-            SConsole.error("Failed to initializing PostgreSQL DB", cadena, "usr:" + usuario, "pass:" + contrasena);
+            SPGConect.pool = new PGPool(PGConnectionProps.buildFromJson(data_base));
+            con = SPGConect.pool.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return null;
+
+        return con;
     }
+
+    public static Connection getConexion() {
+        return con;
+        // return conectar();
+    }
+
+    // private static Connection conectar() {
+    // String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
+    // try {
+    // Class.forName("org.postgresql.Driver");
+    // if (con != null) {
+    // if (!con.isClosed()) {
+    // return con;
+    // }
+    // }
+    // if (Servisofts.DEBUG) {
+    // SConsole.warning("Initializing PostgreSQL DB", cadena, "usr:" + usuario,
+    // "pass:" + contrasena);
+    // }
+    // con = DriverManager.getConnection("jdbc:postgresql://" + ip + ":" + puerto +
+    // "/" + bd_name, usuario,
+    // contrasena);
+
+    // SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" +
+    // contrasena, "ready!");
+    // SLog.put("PostgreSQL.status", "exito");
+    // // restore_backup();
+    // // save_backup();
+    // return con;
+    // } catch (Exception e) {
+    // SLog.put("PostgreSQL.status", "desconectado");
+    // SConsole.error("Failed to initializing PostgreSQL DB", cadena, "usr:" +
+    // usuario, "pass:" + contrasena);
+    // }
+    // return null;
+    // }
 
     public static void Transacction() {
         try {
@@ -229,9 +246,11 @@ public class SPGConect {
         aux = aux.substring(0, aux.length() - 1);
 
         String funct = "update " + nombre_tabla + " set " + aux + " where key ='" + obj.getString("key") + "'";
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeUpdate();
         ps.close(); // Agrege esto corrijiendo calistenia el 28 de agosto 2023
+        SPGConect.pool.releaseConnection(con);
         return true;
     }
 
@@ -320,14 +339,16 @@ public class SPGConect {
         aux = aux.substring(0, aux.length() - 1);
 
         String funct = "update " + nombre_tabla + " set " + aux + " where key ='" + obj.getString("key") + "'";
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeUpdate();
         ps.close(); // Agrege esto corrijiendo calistenia el 28 de agosto 2023
+        SPGConect.pool.releaseConnection(con);
         return true;
     }
 
     public static PreparedStatement preparedStatement(String query) throws SQLException {
-        return getConexion().prepareStatement(query);
+        return con.prepareStatement(query);
     }
 
     public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
@@ -335,9 +356,11 @@ public class SPGConect {
                 .replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + dataStr + "')) RETURNING key";
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeQuery();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
     }
 
     public static void insertArray(String nombre_tabla, JSONArray json) throws SQLException {
@@ -345,22 +368,27 @@ public class SPGConect {
                 .replace("'", "''"); // Escapa comillas simples (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + dataStr + "')) RETURNING key";
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(funct);
         ps.executeQuery();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
     }
 
     public static void insertArray2(String nombre_tabla, JSONArray json) throws SQLException {
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", ?::json)) RETURNING key";
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(funct);
         ps.setString(1, json.toString());
         ps.executeQuery();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
     }
 
     public static JSONArray ejecutarConsultaArray(String consulta) throws SQLException {
-        PreparedStatement ps = getConexion().prepareStatement(consulta);
+        Connection con = SPGConect.pool.getConnection();
+        PreparedStatement ps = con.prepareStatement(consulta);
         ResultSet rs = ps.executeQuery();
         JSONArray arr = new JSONArray();
         if (rs.next()) {
@@ -368,11 +396,13 @@ public class SPGConect {
         }
         rs.close();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
         return arr;
     }
 
     public static int ejecutarConsultaInt(String consulta) throws SQLException {
-        PreparedStatement ps = getConexion().prepareStatement(consulta);
+        Connection con = SPGConect.pool.getConnection();
+        PreparedStatement ps = con.prepareStatement(consulta);
         ResultSet rs = ps.executeQuery();
         int resp = 0;
         if (rs.next()) {
@@ -380,11 +410,13 @@ public class SPGConect {
         }
         rs.close();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
         return resp;
     }
 
     public static String ejecutarConsultaString(String consulta) throws SQLException {
-        PreparedStatement ps = getConexion().prepareStatement(consulta);
+        Connection con = SPGConect.pool.getConnection();
+        PreparedStatement ps = con.prepareStatement(consulta);
         ResultSet rs = ps.executeQuery();
         String resp = "";
         if (rs.next()) {
@@ -392,6 +424,7 @@ public class SPGConect {
         }
         rs.close();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
         return resp;
     }
 
@@ -444,7 +477,8 @@ public class SPGConect {
     }
 
     public static JSONObject ejecutarConsultaObject(String consulta) throws SQLException {
-        PreparedStatement ps = getConexion().prepareStatement(consulta);
+        Connection con = SPGConect.pool.getConnection();
+        PreparedStatement ps = con.prepareStatement(consulta);
         ResultSet rs = ps.executeQuery();
         JSONObject obj = new JSONObject();
         if (rs.next()) {
@@ -452,6 +486,7 @@ public class SPGConect {
         }
         rs.close();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
         return obj;
     }
 
@@ -630,7 +665,8 @@ public class SPGConect {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
             }
-            conectar();
+            SConsole.error("TODO: Reintentar conexion");
+            // conectar();
         }
 
         return isLive();
