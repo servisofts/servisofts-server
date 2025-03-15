@@ -1,9 +1,18 @@
 package Servisofts.PG;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 public class PGConnection {
-    
-    
-    public PGConnection(){
-        // String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
+
+    private PGConnectionProps conf;
+    public Connection con;
+
+    public PGConnection(PGConnectionProps conf) throws SQLException {
+        this.conf = conf;
+        this.con = DriverManager.getConnection("jdbc:postgresql://" + conf.ip + ":" + conf.puerto + "/" + conf.bd_name,
+                conf.user,
+                conf.pass);
     }
 }

@@ -386,7 +386,11 @@ public class SocketCliente extends Thread {
 
     public static void reconect(String server) {
         SocketCliente cliente = Clientes.get(server);
-
+        if (cliente == null) {
+            SConsole.error("Error: SocketCliente: reconect: No existe el cliente: " + server);
+            SocketCliente.StartServicio(server);
+            return;
+        }
         close(server);
 
         if (TReconnect != null) {

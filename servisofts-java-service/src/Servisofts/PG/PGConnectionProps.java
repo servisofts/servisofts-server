@@ -1,17 +1,19 @@
 package Servisofts.PG;
+
 import org.json.JSONObject;
 
 public class PGConnectionProps {
 
     public static PGConnectionProps buildFromJson(JSONObject obj) {
-        return new PGConnectionProps("localhost", 5432, "bd_name", "user", "pass");
+        return new PGConnectionProps(obj.getString("ip"), obj.getInt("puerto"), obj.getString("bd_name"),
+                obj.getString("user"), obj.getString("pass"));
     }
 
-    private String ip;
-    private int puerto;
-    private String bd_name;
-    private String user;
-    private String pass;
+    public String ip;
+    public int puerto;
+    public String bd_name;
+    public String user;
+    public String pass;
 
     public PGConnectionProps(String ip, int puerto, String bd_name, String user, String pass) {
         this.ip = ip;
