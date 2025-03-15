@@ -12,23 +12,19 @@ public class Servisofts {
     public interface Manejador<T, U> {
         public void apply(T t, U u);
     }
-    
+
     public static Manejador<JSONObject, SSSessionAbstract> Manejador;
     public static Manejador<JSONObject, JSONObject> ManejadorCliente;
     public static boolean DEBUG = true;
 
-    public static void initialize() {
+    public static void initialize() throws Exception {
         SConsole.warning("Start Servisofts Java Service 2");
-        try {
-            SConfig.validate();
-            SSL.getKeyStore();
-            SSL.defaultCert();
-            ServiciosHabilitados.init();
-            new SocketCliente("servicio");
-            SPGConect.setConexion(SConfig.getJSON("data_base"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SConfig.validate();
+        SSL.getKeyStore();
+        SSL.defaultCert();
+        ServiciosHabilitados.init();
+        new SocketCliente("servicio");
+        SPGConect.setConexion(SConfig.getJSON("data_base"));
 
     }
 }
