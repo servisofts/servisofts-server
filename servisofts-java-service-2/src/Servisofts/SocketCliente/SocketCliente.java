@@ -38,6 +38,10 @@ public class SocketCliente extends Thread {
 
     }
 
+    public static JSONObject sendSinc(String nombre, JSONObject data) {
+        return sendSinc(nombre, data, 30000);
+    }
+
     public static void send(String nombre, JSONObject data, SSSessionAbstract session) {
         if (session != null) {
             data.put("id_session", session.getIdSession());
