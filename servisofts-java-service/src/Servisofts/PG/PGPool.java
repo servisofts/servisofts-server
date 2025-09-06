@@ -42,7 +42,7 @@ public class PGPool {
                 if (con != null && !con.isClosed()) {
                     connections.remove(con);
                     usedConnections.add(con);
-                    SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
+                    // SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
                     return con;
                 }
 
@@ -59,7 +59,7 @@ public class PGPool {
     public void releaseConnection(Connection con) {
         connections.add(con);
         usedConnections.remove(con);
-        SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
+        // SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
         // SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
         // SConsole.log("Conexion desocupada: ", connections.size());
     }

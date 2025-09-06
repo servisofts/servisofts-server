@@ -4,19 +4,24 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.json.JSONObject;
+import org.postgresql.util.GT;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 
 import Servisofts.SConsole;
 
 public class PGPool {
 
     private int min = 10;
+    private int max = 10;
     private PGConnectionProps conf;
 
-    private final List<Connection> connections = new ArrayList<>();
-    private final List<Connection> usedConnections = new ArrayList<>();
+    private final LinkedList<Connection> connections = new LinkedList<>();
+    private final LinkedList<Connection> usedConnections = new LinkedList<>();
 
     public PGPool(PGConnectionProps conf) throws SQLException {
         SConsole.warning("Try to instance PGPool to db ",conf.bd_name, conf.ip);
@@ -32,21 +37,37 @@ public class PGPool {
                 conf.user,
                 conf.pass);
         connections.add(con);
+        SConsole.succes("DB Pool New Conexion = " + connections.size() + "/" + (this.min));
         return con;
     }
 
     public Connection getConnection() throws SQLException {
         for (int i = 0; i < 10 * 60; i++) {
-            if (!connections.isEmpty()) {
-                Connection con = connections.get(connections.size() - 1);
-                if (con != null && !con.isClosed()) {
-                    connections.remove(con);
-                    usedConnections.add(con);
-                    SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
-                    return con;
-                }
-
+            Connection con = getConnection1();
+            if(con != null) {
+                return con;
             }
+            // if (!connections.isEmpty()) {
+            //     Connection con = connections.get(connections.size() - 1);
+            //     if (con != null && !con.isClosed() && con.isValid(5)) {
+            //         connections.remove(con);
+            //         usedConnections.add(con);
+            //         SConsole.log("DB Pool P = " + connections.size() + "/" + (this.min));
+            //         return con;
+            //     } else {
+            //         connections.remove(con);
+            //         try {
+            //             if(con != null) {
+            //                 con.close();
+            //             }
+            //         } catch (Exception e) {
+            //             e.printStackTrace();
+            //         }
+            //         createConnection();
+            //     }
+
+            // }
+            SConsole.error("DB Pool ND-" + i + " = " + connections.size() + "/" + (this.min));
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -56,10 +77,35 @@ public class PGPool {
         throw new SQLException("No connections available");
     }
 
-    public void releaseConnection(Connection con) {
+    private synchronized Connection getConnection1() throws SQLException {
+        if (!connections.isEmpty()) {
+            Connection con = connections.get(connections.size() - 1);
+            if (con != null && !con.isClosed() && con.isValid(5)) {
+                connections.remove(con);
+                usedConnections.add(con);
+                // SConsole.log("DB Pool P = " + connections.size() + "/" + (this.min));
+                return con;
+            } else {
+                connections.remove(con);
+                try {
+                    if(con != null) {
+                        con.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                createConnection();
+            }
+        }
+        return null;
+    }
+
+
+
+    public synchronized void releaseConnection(Connection con) {
         connections.add(con);
         usedConnections.remove(con);
-        SConsole.log("DB Pool = " + connections.size() + "/" + (this.min));
+        // SConsole.log("DB Pool L = " + connections.size() + "/" + (this.min));
         // SConsole.log("Conexion desocupada: ", connections.size());
     }
 
@@ -72,6 +118,33 @@ public class PGPool {
         }
         connections.clear();
         usedConnections.clear();
+    }
+
+    private boolean isConexionDisponible() {
+        // despues se lo mejora 
+        // 1. verificar si se puede crear mas conexiones
+        if(connections.size() > 0) {
+            return true;
+        }
+        if(getTotalConexiones() > max) {
+            // por el momento retorno false
+            // mejorar para que valide conexiones que estan cerradas
+            return false;
+        }
+
+        return false;
+    }
+
+    private int getTotalConexiones() {
+        return connections.size() + usedConnections.size();
+    }
+
+    private void checkClosed(Connection con) throws SQLException {
+    if (con.isClosed()) {
+        // ver que hacaer
+        throw new PSQLException(GT.tr("This connection has been closed."),
+            PSQLState.CONNECTION_DOES_NOT_EXIST);
+        }
     }
 
     

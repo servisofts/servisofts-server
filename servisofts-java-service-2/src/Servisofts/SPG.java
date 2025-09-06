@@ -3,6 +3,7 @@ package Servisofts;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -73,8 +74,8 @@ public class SPG {
             content= content.replaceAll("\\$" + (i + 1), params[i]);
         }
         // SConsole.info("executeFile", content);
-
-        PreparedStatement ps = SPGConect.preparedStatement(content);
+        Connection con = SPGConect.pool.getConnection();
+        PreparedStatement ps = con.prepareStatement(content);
         ResultSet rs = ps.executeQuery();
 
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -109,6 +110,7 @@ public class SPG {
         }
         rs.close();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
         return arr;
     }
     // public static void main(String[] args) {

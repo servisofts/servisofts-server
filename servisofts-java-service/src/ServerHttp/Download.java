@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import org.jboss.com.sun.net.httpserver.Headers;
 import org.jboss.com.sun.net.httpserver.HttpExchange;
 
+import ServerHttp.Compressor.Compressor;
 import ServerHttp.Compressor.ZIP;
 import Servisofts.SConfig;
 import Servisofts.SConsole;
@@ -39,38 +40,37 @@ public class Download {
         String compressParam = getQueryParam(exchange.getRequestURI(), "compress");
 
         boolean changeName = false;
-        if(file.isDirectory()) {
-            if(!"zip".equals(compressParam)) {
+        if (file.isDirectory()) {
+            if (!"zip".equals(compressParam)) {
                 exchange.sendResponseHeaders(502, -1); // Internal Server Error
                 return;
             }
             file = toZip(file, true);
             changeName = true;
         } else {
-            if("zip".equals(compressParam)) {
+            if ("zip".equals(compressParam)) {
                 file = toZip(file, false);
                 changeName = true;
             }
         }
 
-        
         String rangeHeader = exchange.getRequestHeaders().getFirst("Range");
         // SConsole.info("rangeHeader", rangeHeader);
 
-        if(rangeHeader == null) {
-            byte [] bytearray  = new byte [(int)file.length()];
+        if (rangeHeader == null) {
+            byte[] bytearray = new byte[(int) file.length()];
             FileInputStream fis = new FileInputStream(file);
             BufferedInputStream bis = new BufferedInputStream(fis);
             bis.read(bytearray, 0, bytearray.length);
             exchange.sendResponseHeaders(200, file.length());
             OutputStream os = exchange.getResponseBody();
-            os.write(bytearray,0,bytearray.length);
+            os.write(bytearray, 0, bytearray.length);
             os.close();
             return;
         }
         // SConsole.info("ruta=", ruta);
         // SConsole.info("file=", file.getAbsolutePath());
-        
+
         long fileLength = file.length();
         long start = 0, end = fileLength - 1;
 
@@ -94,8 +94,14 @@ public class Download {
 
         long contentLength = end - start + 1;
         String contentType = getContentType(file.getName());
+        if(contentType == null) {
+            contentType =  Compressor.getMimeType(file);
+        }
+        if (contentType == null) {
+            contentType = "application/octet-stream"; // Default content type if not recognized
+        }
 
-        if(changeName) {
+        if (changeName) {
             headers.set("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
         }
         headers.set("Content-Type", contentType);
@@ -109,17 +115,18 @@ public class Download {
         }
 
         try (OutputStream os = exchange.getResponseBody();
-             FileInputStream fis = new FileInputStream(file);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream bis = new BufferedInputStream(fis)) {
 
             bis.skip(start);
             byte[] buffer = new byte[BUFFER_SIZE];
             long bytesToRead = contentLength;
             int bytesRead;
-            while ((bytesRead = bis.read(buffer, 0, (int)Math.min(buffer.length, bytesToRead))) != -1) {
+            while ((bytesRead = bis.read(buffer, 0, (int) Math.min(buffer.length, bytesToRead))) != -1) {
                 os.write(buffer, 0, bytesRead);
                 bytesToRead -= bytesRead;
-                if (bytesToRead <= 0) break;
+                if (bytesToRead <= 0)
+                    break;
             }
         }
     }
@@ -132,6 +139,7 @@ public class Download {
         } else {
             return "application/octet-stream";
         }
+        
     }
 
     private static File toZip(File source, boolean isFolder) {
@@ -142,34 +150,35 @@ public class Download {
             targetFolder.mkdirs();
         }
 
-        File outputZip  = new File(targetPath + "/" + source.getName() + ".zip");
-        if(outputZip.exists()) {
+        File outputZip = new File(targetPath + "/" + source.getName() + ".zip");
+        if (outputZip.exists()) {
             outputZip.delete();
         }
 
         String outputPath = targetPath + "/" + source.getName() + ".zip";
-        outputZip  = new File(outputPath);
+        outputZip = new File(outputPath);
         System.out.println(outputZip.getPath());
 
         try {
-            if(isFolder) {
+            if (isFolder) {
                 ZIP.zipFolder(Paths.get(source.getPath()), Paths.get(outputZip.getPath()));
             } else {
                 ZIP.zipFile(Paths.get(source.getPath()), Paths.get(outputZip.getPath()));
             }
-            
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        outputZip  = new File(outputPath);
+        outputZip = new File(outputPath);
         return outputZip;
     }
 
     private static String getQueryParam(URI uri, String key) {
         String query = uri.getQuery();
-        if (query == null) return null;
+        if (query == null)
+            return null;
 
         String[] pairs = query.split("&");
         for (String pair : pairs) {

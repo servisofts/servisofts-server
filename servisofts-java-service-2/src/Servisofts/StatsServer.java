@@ -1,5 +1,8 @@
 package Servisofts;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,10 +22,11 @@ public class StatsServer {
         // ServiciosHabilitados.SERVICIOS_HABILITADOS);
         stats.put("pool", poolStatus());
         stats.put("SocketClient", socketClientStatus());
-        // stats.put("session_socket",
-        // SSServerAbstract.getServer(SSServerAbstract.TIPO_SOCKET).getSessiones().size());
-        // stats.put("session_web",
-        // SSServerAbstract.getServer(SSServerAbstract.TIPO_SOCKET_WEB).getSessiones().size());
+        stats.put("memory", memoryStatus());
+        stats.put("session_socket",
+        SSServerAbstract.getServer(SSServerAbstract.TIPO_SOCKET).getSessiones().size());
+        stats.put("session_web",
+        SSServerAbstract.getServer(SSServerAbstract.TIPO_SOCKET_WEB).getSessiones().size());
 
         return stats;
     }
@@ -32,7 +36,7 @@ public class StatsServer {
         SocketCliente.clientes.forEach((nombre, cliente) -> {
             JSONObject socket = new JSONObject();
             socket.put("nombre", nombre);
-            SocketClient.put(nombre, cliente.isOpen);
+            SocketClient.put(nombre, cliente.isIdentificado);
         });
         return SocketClient;
     }
@@ -41,8 +45,28 @@ public class StatsServer {
         JSONObject pool = new JSONObject();
         pool.put("connected", SPGConect.pool != null);
         if (SPGConect.pool != null) {
-            pool.put("stats", SPGConect.pool.getStats());
+            pool.put("connections", SPGConect.pool.getStats());
         }
         return pool;
     }
+
+    public static JSONObject memoryStatus() {
+
+        JSONObject obj = new JSONObject();
+        Runtime runtime = Runtime.getRuntime();
+        ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+
+
+        long memoriaTotal = runtime.totalMemory(); // Memoria total reservada por la JVM
+        long memoriaLibre = runtime.freeMemory(); // Memoria libre dentro de la JVM
+        long memoriaUsada = memoriaTotal - memoriaLibre; // Memoria efectivamente usada
+
+        obj.put("used", memoriaUsada / (1024 * 1024) + " MB");
+        obj.put("free", memoriaLibre / (1024 * 1024) + " MB");
+        obj.put("total", memoriaTotal / (1024 * 1024) + " MB");
+        obj.put("max", runtime.maxMemory() / (1024 * 1024) + " MB");
+        obj.put("threads", threadBean.getThreadCount());
+        return obj;
+    }
+
 }

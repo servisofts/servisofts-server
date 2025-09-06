@@ -58,15 +58,15 @@ public class _Test {
 
     public void live(JSONObject obj, SSSessionAbstract session) {
         obj.put("estado", "exito");
-        System.out.println("live="+new Date());
+        SConsole.log("live="+new Date());
         List<GarbageCollectorMXBean> gcBeans = ManagementFactory.getGarbageCollectorMXBeans();
 
-        for (GarbageCollectorMXBean gcBean : gcBeans) {
-            System.out.println("Nombre del GC: " + gcBean.getName());
-            System.out.println("Número de ejecuciones: " + gcBean.getCollectionCount());
-            System.out.println("Tiempo total (ms): " + gcBean.getCollectionTime());
-            System.out.println("------------------------------");
-        }
+        // for (GarbageCollectorMXBean gcBean : gcBeans) {
+        //     System.out.println("Nombre del GC: " + gcBean.getName());
+        //     System.out.println("Número de ejecuciones: " + gcBean.getCollectionCount());
+        //     System.out.println("Tiempo total (ms): " + gcBean.getCollectionTime());
+        //     System.out.println("------------------------------");
+        // }
     }
 
     public void testServicioHabilitado(JSONObject obj, SSSessionAbstract session) {
@@ -87,7 +87,7 @@ public class _Test {
         long endTime = System.nanoTime();
         long durationInMillis = (endTime - startTime) / 1_000_000;
         obj.put("ping", durationInMillis);
-        SConsole.info("[test] [ServicioHabilitado] [ping=", durationInMillis, "] servicio = ", obj.getString("nombre"), " status = ", obj.getString("estado"));
+        SConsole.info("[test] [ServicioHabilitado] [ping=", durationInMillis, "] servicio = ", obj.getString("nombre"), " status = ", send.getString("estado"));
         // SConsole.info("[test] [ServicioHabilitado] [ping=", durationInMillis, "] Respuesta = ", obj.toString(), obj.getString("estado"));
     }
 
@@ -123,12 +123,14 @@ public class _Test {
 
     public void restartBD(JSONObject obj, SSSessionAbstract session) {
         long startTime = System.nanoTime();
-        if(SPGConect.restartConexion(true)) {
-            obj.put("estado", "exito");
-        } else {
-            obj.put("estado", "error"); 
-            obj.put("error", "No Conectado al a Base de Datos"); 
-        }
+        obj.put("estado", "error"); 
+        obj.put("error", "Metodo Descontinuado"); 
+        // if(SPGConect.restartConexion(true)) {
+        //     obj.put("estado", "exito");
+        // } else {
+        //     obj.put("estado", "error"); 
+        //     obj.put("error", "No Conectado al a Base de Datos"); 
+        // }
         long endTime = System.nanoTime();
         long durationInMillis = (endTime - startTime) / 1_000_000;
         obj.put("ping", durationInMillis);
@@ -137,12 +139,14 @@ public class _Test {
 
     public void closeBD(JSONObject obj, SSSessionAbstract session) {
         long startTime = System.nanoTime();
-        SPGConect.desconectar();
-        obj.put("estado", "exito");
+        obj.put("estado", "error"); 
+        obj.put("error", "Metodo Descontinuado"); 
+        // SPGConect.desconectar();
+        // obj.put("estado", "exito");
         long endTime = System.nanoTime();
         long durationInMillis = (endTime - startTime) / 1_000_000;
         obj.put("ping", durationInMillis);
-        SConsole.info("[test] [closeBD] [ping=", durationInMillis, "] Respuesta = ", obj.toString(), obj.getString("estado"));
+        // SConsole.info("[test] [closeBD] [ping=", durationInMillis, "] Respuesta = ", obj.toString(), obj.getString("estado"));
     }
 
     public void callServicio(JSONObject obj, SSSessionAbstract session) {

@@ -64,29 +64,41 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
         new Thread() {
             @Override
             public void run() {
-                JSONObject data = _data;
-                data.put("id", getIdSession());
-                data.put("noSend", false);
-                // Router router = new Router(Router.TIPO_WS, this);
-                if (INSTANCE.servicio != null) {
-                    if (INSTANCE.servicio.getString("nombre").equals("tapeke")) {
-                        SConsole.log("Mensaje entrante de tapeke");
-                    }
-                    data.put("servicio", INSTANCE.servicio);
-                }
-                String nombre = SConfig.getJSON().getString("nombre");
-                if (data.has("_sincrone_key_" + nombre)) {
-                    String sincrone_key = data.getString("_sincrone_key_" + nombre);
-                    SSSincSend.mapa.get(sincrone_key).onMesagge(data);
-                }
-                data = _Manejador.factory(data, INSTANCE);
+                try {
 
-                if (data.has("noSend")) {
-                    if (data.getBoolean("noSend")) {
-                        return;
+                    // SConsole.log("SSSessionAbstract", "OnMessage", "Recibio mensaje", _data.toString().length());
+                    JSONObject data = _data;
+                    data.put("id", getIdSession());
+                    data.put("noSend", false);
+                    // Router router = new Router(Router.TIPO_WS, this);
+                    if (INSTANCE.servicio != null) {
+                        // if (INSTANCE.servicio.getString("nombre").equals("tapeke")) {
+                        // SConsole.log("Mensaje entrante de tapeke");
+                        // }
+                        data.put("servicio", INSTANCE.servicio);
                     }
+                    String nombre = SConfig.getJSON().getString("nombre");
+                    if (data.has("_sincrone_key_" + nombre)) {
+                        String sincrone_key = data.getString("_sincrone_key_" + nombre);
+                        SSSincSend.mapa.get(sincrone_key).onMesagge(data);
+                    }
+                    data = _Manejador.factory(data, INSTANCE);
+
+                    if (data.has("noSend")) {
+                        if (data.getBoolean("noSend")) {
+                            return;
+                        }
+                    }
+                    
+                    send(data.toString());
+
+                } catch (Exception e) {
+                    _data.put("estado", "error");
+                    _data.put("error", e.getMessage());
+                    send(_data.toString());
+                    e.printStackTrace();
+                    // TODO: handle exception
                 }
-                send(data.toString());
             }
         }.start();
 
@@ -95,7 +107,9 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
     }
 
     public void onClose(JSONObject data) {
+        // SConsole.warning("Close SSSessionAbstract");
         SSServerAbstract.closeSession(getIdSession());
+        // SConsole.warning("Close SSSessionAbstract fin");
     }
 
     public SSServerAbstract getServer() {
@@ -128,12 +142,12 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
 
     public void setKeyDevice(String keyDevice) {
         this.keyDevice = keyDevice;
-        SSServerAbstract.setDeviceSession(keyDevice, getIdSession());
+        // SSServerAbstract.setDeviceSession(keyDevice, getIdSession());
     }
 
     public void setKeyUsuario(String keyUsuario) {
         this.keyUsuario = keyUsuario;
-        SSServerAbstract.setUserSession(keyUsuario, getKeyDevice());
+        // SSServerAbstract.setUserSession(keyUsuario, getKeyDevice());
     }
 
     public void setPendiente(String key, JSONObject pendiente) {

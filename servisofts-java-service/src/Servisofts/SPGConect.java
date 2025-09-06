@@ -39,7 +39,8 @@ public class SPGConect {
         usuario = data_base.getString("user");
         contrasena = data_base.getString("pass");
         // SLog.put("PostgreSQL.status", "desconectado");
-        // SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name);
+        // SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" +
+        // bd_name);
         // SLog.put("PostgreSQL.user", usuario);
         // SLog.put("PostgreSQL.password",
         // contrasena.substring(0, 4) + contrasena.substring(4,
@@ -143,6 +144,13 @@ public class SPGConect {
                     output.append("''");
                     break;
                 case '\\':
+
+                    if (in.length() < (i + 1)) {
+                        if(in.charAt(i) == '\"') {
+                            output.append(c);
+                            break;
+                        }
+                    }
                     output.append("\\\\");
                     break;
                 default:
@@ -352,7 +360,8 @@ public class SPGConect {
     }
 
     public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
-        String dataStr = (new JSONArray().put(json)).toString().replace("'", "''"); // Escapa comillas simples (SQL-safe)
+        String dataStr = (new JSONArray().put(json)).toString().replace("'", "''"); // Escapa comillas simples
+                                                                                    // (SQL-safe)
         String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
                 + ", '" + dataStr + "')) RETURNING key";
         Connection con = SPGConect.pool.getConnection();
@@ -476,16 +485,25 @@ public class SPGConect {
 
     public static JSONObject ejecutarConsultaObject(String consulta) throws SQLException {
         Connection con = SPGConect.pool.getConnection();
-        PreparedStatement ps = con.prepareStatement(consulta);
-        ResultSet rs = ps.executeQuery();
         JSONObject obj = new JSONObject();
-        if (rs.next()) {
-            obj = rs.getString("json") != null ? new JSONObject(rs.getString("json")) : new JSONObject();
+        try {
+            PreparedStatement ps = con.prepareStatement(consulta);
+            ResultSet rs = ps.executeQuery();
+            obj = new JSONObject();
+            if (rs.next()) {
+                obj = rs.getString("json") != null ? new JSONObject(rs.getString("json")) : new JSONObject();
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+
+            // TODO: handle exception
+        } finally {
+            SPGConect.pool.releaseConnection(con);
+            // desconectar();
         }
-        rs.close();
-        ps.close();
-        SPGConect.pool.releaseConnection(con);
         return obj;
+
     }
 
     public static boolean save_backup() {

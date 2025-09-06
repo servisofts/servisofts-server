@@ -56,7 +56,7 @@ public class Uploadv2 implements HttpHandler {
                 }
             }
             ruta = ruta.substring(0, ruta.length() - 1);
-            System.out.println("ruta"+ruta);
+            System.out.println("ruta" + ruta);
             String query = exchange.getRequestURI().getQuery();
             String[] queryParams = query.split("&");
             int chunkNumber = -1;
@@ -105,10 +105,10 @@ public class Uploadv2 implements HttpHandler {
             os.close();
             is.close();
 
-            if(lastModified>0){
+            if (lastModified > 0) {
                 file.setLastModified(lastModified);
             }
-            
+
             if (chunkNumber == totalChunks - 1) {
                 combineChunks(ruta, nombre, totalChunks, lastModified);
             }
@@ -155,38 +155,40 @@ public class Uploadv2 implements HttpHandler {
         }
         os.close();
 
-        if(lastModified>0){
+        if (lastModified > 0) {
             outputFile.setLastModified(lastModified);
         }
-        Compressor.compress(outputFile);
+        Compressor.compress(outputFile, "");
         /*
-        String mime = getMimeType(outputFile);
-        if (mime!=null && mime.indexOf("video") > -1) {
-            try {
-                VideoCompressor.createMiniature(outputFile.getPath());
-                // VideoCompressor.convertMOVtoMP4(SConfig.getJSON("files").getString("url") +
-                // ruta + "/" + fileName, SConfig.getJSON("files").getString("url") + ruta + "/"
-                // + fileName+".mp4");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            // // VideoConverter.convertToMp4(SConfig.getJSON("files").getString("url") +
-            // ruta + "/" + fileName, SConfig.getJSON("files").getString("url") + ruta +
-            // "/__" + fileName);
-        }
-        // File input = new
-        // File(SConfig.getJSON("files").getString("url")+ruta+"/"+fileName);
-        // if(ImageCompressor.isImageFile(input)){
-        // File output120 = new
-        // File(SConfig.getJSON("files").getString("url")+ruta+"/120_"+fileName);
-        // ImageCompressor.resizeAndCompressImage(input, output120, 120, 120, 0.8f);
-
-        // File output480 = new
-        // File(SConfig.getJSON("files").getString("url")+ruta+"/480_"+fileName);
-        // ImageCompressor.resizeAndCompressImage(input, output480, 480, 480, 0.8f);
-        // }
-
-        */
+         * String mime = getMimeType(outputFile);
+         * if (mime!=null && mime.indexOf("video") > -1) {
+         * try {
+         * VideoCompressor.createMiniature(outputFile.getPath());
+         * // VideoCompressor.convertMOVtoMP4(SConfig.getJSON("files").getString("url")
+         * +
+         * // ruta + "/" + fileName, SConfig.getJSON("files").getString("url") + ruta +
+         * "/"
+         * // + fileName+".mp4");
+         * } catch (Exception e) {
+         * e.printStackTrace();
+         * }
+         * // // VideoConverter.convertToMp4(SConfig.getJSON("files").getString("url") +
+         * // ruta + "/" + fileName, SConfig.getJSON("files").getString("url") + ruta +
+         * // "/__" + fileName);
+         * }
+         * // File input = new
+         * // File(SConfig.getJSON("files").getString("url")+ruta+"/"+fileName);
+         * // if(ImageCompressor.isImageFile(input)){
+         * // File output120 = new
+         * // File(SConfig.getJSON("files").getString("url")+ruta+"/120_"+fileName);
+         * // ImageCompressor.resizeAndCompressImage(input, output120, 120, 120, 0.8f);
+         * 
+         * // File output480 = new
+         * // File(SConfig.getJSON("files").getString("url")+ruta+"/480_"+fileName);
+         * // ImageCompressor.resizeAndCompressImage(input, output480, 480, 480, 0.8f);
+         * // }
+         * 
+         */
     }
 
 }

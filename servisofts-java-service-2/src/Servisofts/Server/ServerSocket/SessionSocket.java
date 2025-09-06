@@ -23,8 +23,8 @@ import Servisofts.SConsole;
 import Servisofts.SUtil;
 
 public class SessionSocket extends SSSessionAbstract {
-    private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    // private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
+    // private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private javax.net.ssl.SSLSocket miSession;
     private PrintWriter outpw = null;
     private X509Certificate cer;
@@ -43,7 +43,7 @@ public class SessionSocket extends SSSessionAbstract {
         try {
             outpw = new PrintWriter(miSession.getOutputStream(), true);
             Start();
-            executor.submit(this::processQueue);
+            // executor.submit(this::processQueue);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -52,13 +52,12 @@ public class SessionSocket extends SSSessionAbstract {
     @Override
     public void onMessage(String mensaje) {
         try {
-            SConsole.log("Recivio mensaje", mensaje.length());
             JSONObject data = new JSONObject(mensaje);
-            new Thread() {
-                public void run() {
-                    onMenssage(data);
-                };
-            }.start();
+            // new Thread() {
+            // public void run() {
+            onMenssage(data);
+            // };
+            // }.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -68,7 +67,7 @@ public class SessionSocket extends SSSessionAbstract {
     @Override
     public void onClose(JSONObject obj) {
         try {
-            executor.shutdownNow();
+            // executor.shutdownNow();
             miSession.close();
             super.onClose(obj);
             // printLog("Conexion cerrada: ip = " + getIdSession() + " )");
@@ -85,7 +84,9 @@ public class SessionSocket extends SSSessionAbstract {
     @Override
     public void send(String mensaje) {
         // MensajeSocket mensajeSocket = new MensajeSocket(mensaje, this);
-        messageQueue.offer(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---");
+        outpw.write(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---\n");
+        outpw.flush();
+        // messageQueue.offer(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---");
 
     }
 
@@ -178,33 +179,33 @@ public class SessionSocket extends SSSessionAbstract {
         return true;
     }
 
-    private void processQueue() {
-        while (true) {
-            try {
-                String mensaje = messageQueue.take();
-                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                    try {
-                        // this.miSession.getRemote().sendString(mensaje);
-                        outpw.write(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---\n");
-                        outpw.flush();
-                    } catch (Exception e) {
-                        throw new CompletionException(e);
-                    }
-                });
+    // private void processQueue() {
+    //     while (true) {
+    //         try {
+    //             String mensaje = messageQueue.take();
+    //             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+    //                 try {
+    //                     // this.miSession.getRemote().sendString(mensaje);
+    //                     outpw.write(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---\n");
+    //                     outpw.flush();
+    //                 } catch (Exception e) {
+    //                     throw new CompletionException(e);
+    //                 }
+    //             });
 
-                future.whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        System.err.println("Failed to send message: " + ex.getMessage());
-                        // ex.printStackTrace();
-                    }
-                });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    //             future.whenComplete((result, ex) -> {
+    //                 if (ex != null) {
+    //                     System.err.println("Failed to send message: " + ex.getMessage());
+    //                     // ex.printStackTrace();
+    //                 }
+    //             });
+    //         } catch (InterruptedException e) {
+    //             Thread.currentThread().interrupt();
+    //             break;
+    //         } catch (Exception e) {
+    //             e.printStackTrace();
+    //         }
+    //     }
+    // }
 
 }

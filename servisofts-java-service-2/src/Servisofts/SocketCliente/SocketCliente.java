@@ -38,6 +38,10 @@ public class SocketCliente extends Thread {
 
     }
 
+    public static JSONObject sendSinc(String nombre, JSONObject data) {
+        return sendSinc(nombre, data, 30000);
+    }
+
     public static void send(String nombre, JSONObject data, SSSessionAbstract session) {
         if (session != null) {
             data.put("id_session", session.getIdSession());
@@ -53,19 +57,27 @@ public class SocketCliente extends Thread {
 
     }
 
-    public static void reconect(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reconect'");
+    public static void reconect(String string) throws Exception {
+        SocketCliente cliente = getCliente(string);
+        if (cliente != null) {
+            cliente.socket.close();
+        }
+        // try {
+        //     new SocketCliente(string);
+        // } catch (Exception e) {
+        //     SConsole.error("Error al reconectar: " + e.getMessage());
+        // }
     }
 
     // CLASS
 
     public String nombre;
     private JSONObject service;
-    private SSLSocket socket;
+    public SSLSocket socket;
     private PrintWriter response;
     private BufferedReader request;
     public volatile boolean isOpen = false;
+    public volatile boolean isIdentificado = false;
 
     private SocketClienteSincroned sincroned = new SocketClienteSincroned(this);
 
@@ -85,7 +97,7 @@ public class SocketCliente extends Thread {
         start();
     }
 
-    public void onMessage(JSONObject data) {
+    public void onMessage(final JSONObject data) {
         new Thread(() -> {
             try {
 
@@ -141,7 +153,9 @@ public class SocketCliente extends Thread {
         }
     }
 
-    public void close() {
+    // que sea privado siempre por que no se puede cerrar la conexion desde aqui
+    //    cierre con socket.close()
+    private void close() {
         this.isOpen = false;
         clientes.remove(this.nombre);
         try {
