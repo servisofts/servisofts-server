@@ -12,14 +12,17 @@ import Servisofts.SConsole;
 
 public class Compressor {
 
-    public static void compress(File file) {
-        Compressor.compress(file, false);
+    public static void compress(File file, String mimetype) {
+        Compressor.compress(file, mimetype, false);
     }
 
-    public static void compress(File file, boolean force) {
+    public static void compress(File file, String minetype, boolean force) {
         String mime;
         try {
             mime = getMimeType(file);
+            if (mime == null) {
+                mime = minetype;
+            }
             SConsole.info("mime", mime);
             if (mime != null && mime.indexOf("video") > -1) {
                 try {
@@ -45,7 +48,7 @@ public class Compressor {
                 return;
             }
 
-            if (force==true || (mime != null && mime.indexOf("image") > -1)) {
+            if (force == true || (mime != null && mime.indexOf("image") > -1)) {
                 try {
                     ImageCompressor.compress(file.getPath(), false, true, 512);
                     ImageCompressor.compress(file.getPath(), false, true, 128);

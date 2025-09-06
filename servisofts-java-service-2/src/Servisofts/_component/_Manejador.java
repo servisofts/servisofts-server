@@ -38,6 +38,7 @@ public class _Manejador {
                             break;
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     SConsole.error("Error en el componente: " + data.getString("component"));
                 }
 

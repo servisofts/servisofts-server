@@ -13,7 +13,7 @@ import org.jboss.com.sun.net.httpserver.HttpHandler;
 import ServerHttp.Compressor.Compressor;
 import Servisofts.SConfig;
 
-public class Uploadv3 implements HttpHandler{
+public class Uploadv3 implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -62,7 +62,9 @@ public class Uploadv3 implements HttpHandler{
             byte[] buffer = new byte[1024];
             int bytesRead;
             long totalBytesRead = 0;
-            long fileSize = exchange.getRequestHeaders().getFirst("Content-Length") != null ? Long.parseLong(exchange.getRequestHeaders().getFirst("Content-Length")) : -1;
+            long fileSize = exchange.getRequestHeaders().getFirst("Content-Length") != null
+                    ? Long.parseLong(exchange.getRequestHeaders().getFirst("Content-Length"))
+                    : -1;
 
             while ((bytesRead = is.read(buffer)) != -1) {
                 os.write(buffer, 0, bytesRead);
@@ -76,7 +78,7 @@ public class Uploadv3 implements HttpHandler{
             os.close();
             is.close();
 
-            Compressor.compress(file);
+            Compressor.compress(file, "");
 
             String response = "File uploaded successfully.";
             exchange.sendResponseHeaders(200, response.getBytes(StandardCharsets.UTF_8).length);

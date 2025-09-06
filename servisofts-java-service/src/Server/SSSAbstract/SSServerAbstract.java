@@ -160,6 +160,33 @@ public abstract class SSServerAbstract implements SSServerInterface {
 
     }
 
+    public static void sendUserNoMySession(JSONObject data, String key_usrs, SSSessionAbstract session) {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                String message = data.toString();
+                for (Map.Entry me : SERVIDORES.entrySet()) {
+                    SSServerAbstract server = SERVIDORES.get(me.getKey());
+                    HashMap<String, SSSessionAbstract> sesiones = server.getSessiones();
+                    for (Map.Entry ks : sesiones.entrySet()) {
+                        if (ks.getKey().equals(session.getIdSession())) {
+                            continue; // Skip the session that sent the message
+                        }
+                        SSSessionAbstract ses = sesiones.get(ks.getKey());
+                        if (ses != null) {
+                            if ((ses.getKeyUsuario() + "").equals(key_usrs)) {
+                                ses.send(message);
+                            }
+                        }
+
+                    }
+                }
+            }
+        };
+        t.start();
+
+    }
+
     public static void sendUsers(JSONObject data, JSONArray key_usrs) {
         for (int i = 0; i < key_usrs.length(); i++) {
             String key_usr = key_usrs.getString(i);

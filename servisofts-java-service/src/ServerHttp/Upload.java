@@ -73,7 +73,7 @@ public class Upload {
                 file = new File(SConfig.getJSON("files").getString("url") + ruta + "/" + nombre);
                 copyInputStreamToFile(fi.getInputStream(), file);
 
-                Compressor.compress(file, true);
+                Compressor.compress(file, fi.getContentType(), true);
             }
 
             String response = "exito";

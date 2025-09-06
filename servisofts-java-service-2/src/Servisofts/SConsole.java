@@ -1,8 +1,24 @@
 package Servisofts;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SConsole {
+
+    public static enum LEVEL {
+        LOG, SUCCES, WARNING, INFO, ERROR
+    }
+
+    public static ArrayList<LEVEL> LOG_LEVEL = new ArrayList<LEVEL>() {
+        {
+            add(LEVEL.LOG);
+            add(LEVEL.SUCCES);
+            add(LEVEL.WARNING);
+            add(LEVEL.INFO);
+            add(LEVEL.ERROR);
+        }
+    };
+
     private static final String ANSI_BLACK = "\u001B[30m";
     private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_GREEN = "\u001B[32m";
@@ -24,6 +40,8 @@ public class SConsole {
     private static final String ANSI_RESET = "\u001B[0m";
 
     public static void log(Object... args) {
+        if (!LOG_LEVEL.contains(LEVEL.LOG))
+            return;
         System.out.print(ANSI_RESET);
         System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
@@ -33,6 +51,8 @@ public class SConsole {
     }
 
     public static void succes(Object... args) {
+        if (!LOG_LEVEL.contains(LEVEL.SUCCES))
+            return;
         System.out.print(ANSI_GREEN);
         System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
@@ -42,6 +62,8 @@ public class SConsole {
     }
 
     public static void warning(Object... args) {
+        if (!LOG_LEVEL.contains(LEVEL.WARNING))
+            return;
         System.out.print(ANSI_YELLOW);
         System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
@@ -51,6 +73,8 @@ public class SConsole {
     }
 
     public static void info(Object... args) {
+        if (!LOG_LEVEL.contains(LEVEL.INFO))
+            return;
         System.out.print(ANSI_BLUE);
         System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {
@@ -60,6 +84,8 @@ public class SConsole {
     }
 
     public static void error(Object... args) {
+        if (!LOG_LEVEL.contains(LEVEL.ERROR))
+            return;
         System.out.print(ANSI_RED);
         System.out.print("[" + new Date().toString() + "] ");
         for (int i = 0; i < args.length; i++) {

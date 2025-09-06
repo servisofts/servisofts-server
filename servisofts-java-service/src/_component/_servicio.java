@@ -183,7 +183,7 @@ public class _servicio {
         JSONObject data = new JSONObject();
         data.put("cert", SConfig.getJSON("ssl").getJSONObject("cert"));
         data.put("ip", SMyIp.getLocalIp());
-        data.put("ip_public", SMyIp.getPublicIp());
+        data.put("ip_public","servisofts.com");
         String fingerp = SSL.getFingerPrint(SConfig.getJSON("ssl").getJSONObject("cert").getString("OU"));
         data.put("fingerp", fingerp);
         JSONObject objSend = new JSONObject();

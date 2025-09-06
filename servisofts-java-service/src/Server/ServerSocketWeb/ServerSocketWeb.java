@@ -26,7 +26,7 @@ public class ServerSocketWeb extends SSServerAbstract {
                         WebSocketHandler wsHandler = new WebSocketHandler() {
                             @Override
                             public void configure(WebSocketServletFactory factory) {
-                                factory.getPolicy().setMaxTextMessageSize(1000000);
+                                factory.getPolicy().setMaxTextMessageSize(5 * 1024 * 1024);
                                 factory.register(Session.class);
                             }
                         };
@@ -34,7 +34,7 @@ public class ServerSocketWeb extends SSServerAbstract {
                         server.start();
                         SConsole.succes("WebSocket on port ( " + portNumber + " ) is ready!");
                         server.join();
-                      
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         // TODO: handle exception

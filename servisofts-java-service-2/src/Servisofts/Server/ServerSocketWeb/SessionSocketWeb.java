@@ -1,33 +1,28 @@
 package Servisofts.Server.ServerSocketWeb;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.io.IOException;
 
 import org.json.JSONObject;
 
 // import Server.MensajeSocket;
 import Servisofts.Server.SSSAbstract.SSServerAbstract;
 import Servisofts.Server.SSSAbstract.SSSessionAbstract;
+import Servisofts.SConsole;
 import Servisofts.SUtil;
 
 public class SessionSocketWeb extends SSSessionAbstract {
-    private final BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private org.eclipse.jetty.websocket.api.Session miSession;
+    // private final BlockingQueue<String> messageQueue = new
+    // LinkedBlockingQueue<>();
+    // private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private jakarta.websocket.Session miSession;
 
     public SessionSocketWeb(Object session) {
-        super(session, ((org.eclipse.jetty.websocket.api.Session) session).getRemoteAddress().toString(),
+        super(session, ((jakarta.websocket.Session) session).getId(),
                 SSServerAbstract.getServer(SSServerAbstract.TIPO_SOCKET_WEB));
-        this.miSession = (org.eclipse.jetty.websocket.api.Session) session;
-        this.miSession.setIdleTimeout(1000 * 60 * 60);
-        executor.submit(this::processQueue);
+        this.miSession = (jakarta.websocket.Session) session;
+        this.miSession.setMaxIdleTimeout(5 * 60 * 1000);
+        // this.miSession.setIdleTimeout(1000 * 60 * 60);
+        // executor.submit(this::processQueue);
         onOpen();
 
     }
@@ -39,8 +34,14 @@ public class SessionSocketWeb extends SSSessionAbstract {
 
     @Override
     public void onClose(JSONObject obj) {
-        executor.shutdownNow();
-        miSession.close();
+        // executor.shutdownNow();
+        // SConsole.warning("Close SessionSocketWeb");
+        try {
+            miSession.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         super.onClose(obj);
 
     }
@@ -49,13 +50,20 @@ public class SessionSocketWeb extends SSSessionAbstract {
     public void onError(JSONObject obj) {
         // TODO Auto-generated method stub
         System.out.println("Error en la session socket Web ");
-        miSession.close();
+        try {
+            miSession.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         super.onClose(obj);
     }
 
     @Override
     public void send(String mensaje) {
-        messageQueue.offer(mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---");
+        String finalmsn = mensaje + "---SSkey---" + SUtil.uuid() + "---SSofts---";
+        this.miSession.getAsyncRemote().sendText(finalmsn);
+        // messageQueue.offer();
         // try {
         // // MensajeSocket mensajeSocket = new MensajeSocket(mensaje, this);
         // // Future<Void> fut;
@@ -70,49 +78,60 @@ public class SessionSocketWeb extends SSSessionAbstract {
         // }
     }
 
-    private void processQueue() {
-        while (true) {
-            try {
-                String mensaje = messageQueue.take();
-                sendMessageWithRetry(mensaje, 3, 1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
+    // private void processQueue() {
+    // while (true) {
+    // try {
+    // String mensaje = messageQueue.take();
+    // sendMessageWithRetry(mensaje, 3, 1000);
+    // } catch (InterruptedException e) {
+    // Thread.currentThread().interrupt();
+    // break;
+    // } catch (Exception e) {
+    // e.printStackTrace();
+    // }
+    // }
+    // }
 
-    private void sendMessageWithRetry(String mensaje, int maxRetries, long initialDelay) {
-        AtomicInteger attempt = new AtomicInteger(0);
-        sendMessage(mensaje, attempt, maxRetries, initialDelay);
-    }
+    // private void sendMessageWithRetry(String mensaje, int maxRetries, long
+    // initialDelay) {
+    // AtomicInteger attempt = new AtomicInteger(0);
+    // sendMessage(mensaje, attempt, maxRetries, initialDelay);
+    // }
 
-    private void sendMessage(String mensaje, AtomicInteger attempt, int maxRetries, long delay) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                this.miSession.getRemote().sendString(mensaje);
-            } catch (Exception e) {
-                if (attempt.incrementAndGet() < maxRetries) {
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
-                    // Retry with exponential backoff
-                    sendMessage(mensaje, attempt, maxRetries, delay * 2);
-                } else {
-                    throw new CompletionException(e);
-                }
-            }
-        }).whenComplete((result, ex) -> {
-            if (ex != null) {
-                System.err.println("Failed to send message after retries: " + ex.getMessage());
-                ex.printStackTrace();
-            }
-        });
-    }
+    // private void sendMessage(String mensaje, AtomicInteger attempt, int
+    // maxRetries, long delay) {
+    // CompletableFuture.runAsync(() -> {
+    // try {
+    // if (this.miSession.isOpen()) {
+
+    // // WebSockets.sendText(mensaje, this.miSession, null);
+    // this.miSession.getBasicRemote().sendText(mensaje);
+    // }
+    // // else {
+    // // miSession.close();
+    // // super.onClose(null);
+    // // }
+    // } catch (Exception e) {
+    // if (attempt.incrementAndGet() < maxRetries) {
+    // try {
+    // Thread.sleep(delay);
+    // } catch (InterruptedException ie) {
+    // Thread.currentThread().interrupt();
+    // }
+    // // Retry with exponential backoff
+    // sendMessage(mensaje, attempt, maxRetries, delay * 2);
+    // } else {
+    // throw new CompletionException(e);
+    // }
+    // }
+    // }).whenComplete((result, ex) -> {
+    // if (ex != null) {
+    // System.err.println("Failed to send message after retries: " +
+    // ex.getMessage());
+    // ex.printStackTrace();
+    // }
+    // });
+    // }
 
     @Override
     public void printLog(String mensaje) {

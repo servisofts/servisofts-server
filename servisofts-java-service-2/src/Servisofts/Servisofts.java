@@ -18,13 +18,17 @@ public class Servisofts {
     public static boolean DEBUG = true;
 
     public static void initialize() throws Exception {
+        // System.setProperty("xnio.spi.log", "ALL");
         SConsole.warning("Start Servisofts Java Service 2");
+        SConsole.warning("servisofts-java-service version: 1.0.1");
         SConfig.validate();
         SSL.getKeyStore();
         SSL.defaultCert();
         ServiciosHabilitados.init();
         new SocketCliente("servicio");
-        SPGConect.setConexion(SConfig.getJSON("data_base"));
+        if (SConfig.getJSON().has("data_base")) {
+            SPGConect.setConexion(SConfig.getJSON("data_base"));
+        }
 
     }
 }

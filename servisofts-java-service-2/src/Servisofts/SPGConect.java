@@ -21,7 +21,7 @@ import Servisofts.PG.PGPool;
 
 public class SPGConect {
 
-    private static Connection con;
+    // private static Connection con;
     private static String ip;
     private static String puerto;
     private static String usuario;
@@ -32,14 +32,15 @@ public class SPGConect {
 
     public static PGPool pool;
 
-    public static Connection setConexion(JSONObject data_base) {
+    public static void setConexion(JSONObject data_base) {
         ip = data_base.getString("ip");
         bd_name = data_base.getString("bd_name");
         puerto = data_base.getInt("puerto") + "";
         usuario = data_base.getString("user");
         contrasena = data_base.getString("pass");
         // SLog.put("PostgreSQL.status", "desconectado");
-        // SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name);
+        // SLog.put("PostgreSQL.host", "jdbc:postgresql://" + ip + ":" + puerto + "/" +
+        // bd_name);
         // SLog.put("PostgreSQL.user", usuario);
         // SLog.put("PostgreSQL.password",
         // contrasena.substring(0, 4) + contrasena.substring(4,
@@ -47,18 +48,18 @@ public class SPGConect {
 
         try {
             SPGConect.pool = new PGPool(PGConnectionProps.buildFromJson(data_base));
-            con = SPGConect.pool.getConnection();
+            // con = SPGConect.pool.getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return con;
+        // return con;
     }
 
-    public static Connection getConexion() {
-        return con;
-        // return conectar();
-    }
+    // public static Connection getConexion() {
+    // return con;
+    // // return conectar();
+    // }
 
     // private static Connection conectar() {
     // String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
@@ -91,48 +92,48 @@ public class SPGConect {
     // return null;
     // }
 
-    public static void Transacction() {
-        try {
-            if (con.getAutoCommit()) {
-                con.setAutoCommit(false);
-            }
-        } catch (SQLException ex) {
-            // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    // public static void Transacction() {
+    // try {
+    // if (con.getAutoCommit()) {
+    // con.setAutoCommit(false);
+    // }
+    // } catch (SQLException ex) {
+    // // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
+    // }
+    // }
 
-    public static void Transacction_end() {
-        try {
-            if (!con.getAutoCommit())
-                con.setAutoCommit(true);
-        } catch (SQLException ex) {
-            // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    // public static void Transacction_end() {
+    // try {
+    // if (!con.getAutoCommit())
+    // con.setAutoCommit(true);
+    // } catch (SQLException ex) {
+    // // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
+    // }
+    // }
 
-    public static void commit() {
-        try {
-            con.commit();
-        } catch (SQLException ex) {
-            // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    // public static void commit() {
+    // try {
+    // con.commit();
+    // } catch (SQLException ex) {
+    // // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
+    // }
+    // }
 
-    public static void rollback() {
-        try {
-            con.rollback();
-        } catch (SQLException ex) {
-            // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    // public static void rollback() {
+    // try {
+    // con.rollback();
+    // } catch (SQLException ex) {
+    // // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
+    // }
+    // }
 
-    public void rollback(Savepoint savepoint) {
-        try {
-            con.rollback(savepoint);
-        } catch (SQLException ex) {
-            // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    // public void rollback(Savepoint savepoint) {
+    // try {
+    // con.rollback(savepoint);
+    // } catch (SQLException ex) {
+    // // Logger.getLogger(SPGConect.class.getName()).log(Level.SEVERE, null, ex);
+    // }
+    // }
 
     public static String escapeEspecialChar(String in) {
         StringBuilder output = new StringBuilder();
@@ -347,9 +348,10 @@ public class SPGConect {
         return true;
     }
 
-    public static PreparedStatement preparedStatement(String query) throws SQLException {
-        return con.prepareStatement(query);
-    }
+    // public static PreparedStatement preparedStatement(String query) throws
+    // SQLException {
+    // return con.prepareStatement(query);
+    // }
 
     public static void insertObject(String nombre_tabla, JSONObject json) throws SQLException {
         String dataStr = (new JSONArray().put(json)).toString().replace("\\", "\\\\") // Escapa backslashes
@@ -364,40 +366,59 @@ public class SPGConect {
     }
 
     public static void insertArray(String nombre_tabla, JSONArray json) throws SQLException {
-        String dataStr = json.toString().replace("\\", "\\\\") // Escapa backslashes
-                .replace("'", "''"); // Escapa comillas simples (SQL-safe)
-        String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
-                + ", '" + dataStr + "')) RETURNING key";
         Connection con = SPGConect.pool.getConnection();
-        PreparedStatement ps = con.prepareStatement(funct);
-        ps.executeQuery();
-        ps.close();
-        SPGConect.pool.releaseConnection(con);
+
+        try {
+            String dataStr = json.toString().replace("'", "''"); // Escapa comillas simples (SQL-safe)
+            String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::"
+                    + nombre_tabla
+                    + ", '" + dataStr + "')) RETURNING key";
+            PreparedStatement ps = con.prepareStatement(funct);
+            ps.executeQuery();
+            ps.close();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            SPGConect.pool.releaseConnection(con);
+        }
+
     }
 
     public static void insertArray2(String nombre_tabla, JSONArray json) throws SQLException {
-        String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::" + nombre_tabla
-                + ", ?::json)) RETURNING key";
         Connection con = SPGConect.pool.getConnection();
-        PreparedStatement ps = con.prepareStatement(funct);
-        ps.setString(1, json.toString());
-        ps.executeQuery();
-        ps.close();
-        SPGConect.pool.releaseConnection(con);
+        
+        try {
+            String funct = "insert into " + nombre_tabla + " (select * from json_populate_recordset(null::"
+                    + nombre_tabla
+                    + ", ?::json)) RETURNING key";
+            PreparedStatement ps = con.prepareStatement(funct);
+            ps.setString(1, json.toString());
+            ps.executeQuery();
+            ps.close();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            SPGConect.pool.releaseConnection(con);
+        }
     }
 
     public static JSONArray ejecutarConsultaArray(String consulta) throws SQLException {
         Connection con = SPGConect.pool.getConnection();
-        PreparedStatement ps = con.prepareStatement(consulta);
-        ResultSet rs = ps.executeQuery();
-        JSONArray arr = new JSONArray();
-        if (rs.next()) {
-            arr = rs.getString("json") == null ? new JSONArray() : new JSONArray(rs.getString("json"));
+        try {
+            PreparedStatement ps = con.prepareStatement(consulta);
+            ResultSet rs = ps.executeQuery();
+            JSONArray arr = new JSONArray();
+            if (rs.next()) {
+                arr = rs.getString("json") == null ? new JSONArray() : new JSONArray(rs.getString("json"));
+            }
+            rs.close();
+            ps.close();
+            SPGConect.pool.releaseConnection(con);
+            return arr;
+        } catch (Exception e) {
+            SPGConect.pool.releaseConnection(con);
+            throw e;
         }
-        rs.close();
-        ps.close();
-        SPGConect.pool.releaseConnection(con);
-        return arr;
     }
 
     public static int ejecutarConsultaInt(String consulta) throws SQLException {
@@ -428,11 +449,21 @@ public class SPGConect {
         return resp;
     }
 
-    public static void ejecutar(String consulta) {
+    public static void ejecutar(String consulta) throws SQLException {
+        Connection con = null;
+        try {
+            con = SPGConect.pool.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (con == null) {
+            return;
+        }
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(consulta);
             ps.executeUpdate();
+            SPGConect.pool.releaseConnection(con);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -443,16 +474,29 @@ public class SPGConect {
                     e.printStackTrace(); // Considera registrar o manejar adecuadamente esta excepción.
                 }
             }
+            SPGConect.pool.releaseConnection(con);
         }
     }
 
     public static void execute(String consulta) throws SQLException {
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(consulta);
         ps.execute();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
     }
 
     public static void ejecutarUpdate(String consulta) {
+        Connection con = null;
+        try {
+            con = SPGConect.pool.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (con == null) {
+            return;
+        }
+
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(consulta);
@@ -467,27 +511,37 @@ public class SPGConect {
                     e.printStackTrace(); // Considera registrar o manejar adecuadamente esta excepción.
                 }
             }
+            SPGConect.pool.releaseConnection(con);
         }
+
     }
 
     public static void executeUpdate(String consulta) throws SQLException {
+        Connection con = SPGConect.pool.getConnection();
         PreparedStatement ps = con.prepareStatement(consulta);
         ps.executeUpdate();
         ps.close();
+        SPGConect.pool.releaseConnection(con);
     }
 
     public static JSONObject ejecutarConsultaObject(String consulta) throws SQLException {
         Connection con = SPGConect.pool.getConnection();
-        PreparedStatement ps = con.prepareStatement(consulta);
-        ResultSet rs = ps.executeQuery();
-        JSONObject obj = new JSONObject();
-        if (rs.next()) {
-            obj = rs.getString("json") != null ? new JSONObject(rs.getString("json")) : new JSONObject();
+        try {
+            PreparedStatement ps = con.prepareStatement(consulta);
+            ResultSet rs = ps.executeQuery();
+            JSONObject obj = new JSONObject();
+            if (rs.next()) {
+                obj = rs.getString("json") != null ? new JSONObject(rs.getString("json")) : new JSONObject();
+            }
+            rs.close();
+            ps.close();
+            SPGConect.pool.releaseConnection(con);
+            return obj;
+        } catch (SQLException e) {
+            SPGConect.pool.releaseConnection(con);
+            throw e;
         }
-        rs.close();
-        ps.close();
-        SPGConect.pool.releaseConnection(con);
-        return obj;
+
     }
 
     public static boolean save_backup() {
@@ -645,31 +699,32 @@ public class SPGConect {
         return isLive;
     }
 
-    public static void desconectar() {
-        try {
-            if (con != null) {
-                con.close();
-            }
-        } catch (Exception e) {
+    // public static void desconectar() {
+    // try {
+    // if (con != null) {
+    // con.close();
+    // }
+    // } catch (Exception e) {
 
-        }
-        String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
-        SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" + contrasena, "desconectado :(");
-        // SLog.put("PostgreSQL.status", "desconectado");
-    }
+    // }
+    // String cadena = "jdbc:postgresql://" + ip + ":" + puerto + "/" + bd_name;
+    // SConsole.succes("PostgreSQL DB ", cadena, "usr:" + usuario, "pass:" +
+    // contrasena, "desconectado :(");
+    // // SLog.put("PostgreSQL.status", "desconectado");
+    // }
 
-    public static boolean restartConexion(boolean forzar) {
-        if (forzar || !isLive()) {
-            desconectar();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-            SConsole.error("TODO: Reintentar conexion");
-            // conectar();
-        }
+    // public static boolean restartConexion(boolean forzar) {
+    // if (forzar || !isLive()) {
+    // desconectar();
+    // try {
+    // Thread.sleep(100);
+    // } catch (InterruptedException e) {
+    // }
+    // SConsole.error("TODO: Reintentar conexion");
+    // // conectar();
+    // }
 
-        return isLive();
-    }
+    // return isLive();
+    // }
 
 }

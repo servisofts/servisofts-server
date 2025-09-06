@@ -84,6 +84,7 @@ public class SPGConectInstance {
 
    public void close(){
       try {
+         SConsole.info("Cerrando conexión a la base de datos");
          this.con.close();
       } catch (SQLException e) {
          // TODO Auto-generated catch block

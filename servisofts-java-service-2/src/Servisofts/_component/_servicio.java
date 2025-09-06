@@ -1,6 +1,7 @@
 package Servisofts._component;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -138,7 +139,7 @@ public class _servicio {
         objSend.put("type", "initServer");
         objSend.put("data", data);
         objSend.put("estado", "cargando");
-
+        SocketCliente.getCliente("servicio").isIdentificado = true;
         JSONObject response = SocketCliente.getCliente("servicio").sendSync(objSend);
         if (response.optString("estado").equals("exito")) {
             JSONObject servicio = response.getJSONObject("data");
@@ -170,6 +171,13 @@ public class _servicio {
                     "Asegurece de que el servicio permite sincrone_key solo en las nuevas versiones");
         } else {
             SConsole.succes("SERVER INICIADO:\t\t" + socketCliente.nombre);
+            socketCliente.isIdentificado = true;
+            return new JSONObject();
+        }
+        try {
+            socketCliente.socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
 
