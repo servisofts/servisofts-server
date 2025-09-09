@@ -240,7 +240,12 @@ public class SocketCliente extends Thread {
     private void onMesagge(String msg, JSONObject config) {
         try {
             String nombre = SConfig.getJSON().getString("nombre");
+            if(msg == null) {
+                this.Open = false;
+                return;
+            }
             JSONObject data = new JSONObject(msg);
+            
             data.put("info", config);
             if (data.has("_sincrone_key_" + nombre)) {
                 String sincrone_key = data.getString("_sincrone_key_" + nombre);
@@ -260,6 +265,8 @@ public class SocketCliente extends Thread {
 
         } catch (Exception e) {
             if (e.getMessage() != null) {
+               
+                e.printStackTrace();
                 SConsole.error("ERROR: SocketCliente: OnMensaje: " + e.getMessage());
             } else {
                 this.Open = false;
