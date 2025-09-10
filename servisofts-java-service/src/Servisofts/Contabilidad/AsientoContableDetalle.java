@@ -1,5 +1,6 @@
 package Servisofts.Contabilidad;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class AsientoContableDetalle {
@@ -22,6 +23,7 @@ public class AsientoContableDetalle {
     public String glosa;
     public String key_moneda;
     public double tipo_cambio = 1;
+    public JSONObject tags = new JSONObject();
     public double debe;
     public double haber;
     public double debe_me;
@@ -32,11 +34,30 @@ public class AsientoContableDetalle {
         this.key_cuenta_contable = key_cuenta_contable;
     }
 
+    public AsientoContableDetalle(String key_cuenta_contable, String glosa, JSONObject tags) {
+        this.glosa = glosa;
+        this.key_cuenta_contable = key_cuenta_contable;
+        this.tags = tags;
+    }
+
     public AsientoContableDetalle(String key_cuenta_contable, String glosa, String key_moneda, double tipo_cambio) {
         this.glosa = glosa;
         this.key_moneda = key_moneda;
         this.key_cuenta_contable = key_cuenta_contable;
         this.tipo_cambio = tipo_cambio;
+    }
+
+    public AsientoContableDetalle(String key_cuenta_contable, String glosa, String key_moneda, double tipo_cambio, JSONObject tags) {
+        this.glosa = glosa;
+        this.key_moneda = key_moneda;
+        this.key_cuenta_contable = key_cuenta_contable;
+        this.tipo_cambio = tipo_cambio;
+        this.tags = tags;
+    }
+
+    public AsientoContableDetalle setTags(JSONObject tags) {
+        this.tags = tags;
+        return this;
     }
 
     public AsientoContableDetalle setDebe(double debe) {
@@ -64,6 +85,7 @@ public class AsientoContableDetalle {
         json.put("haber", haber);
         json.put("haber_me", haber_me);
         json.put("key_moneda", key_moneda);
+        json.put("tags", tags);
         return json;
     }
 
