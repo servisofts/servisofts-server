@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import Servisofts.Server.SSSAbstract.SSSessionAbstract;
 import Servisofts.SocketCliente.ServiciosHabilitados;
 import Servisofts.SocketCliente.SocketCliente;
-import Servisofts._component._servicio;
 
 public class Servisofts {
     @FunctionalInterface
@@ -20,8 +19,8 @@ public class Servisofts {
     public static void initialize() throws Exception {
         // System.setProperty("xnio.spi.log", "ALL");
         SConsole.warning("Start Servisofts Java Service 2");
-        SConsole.warning("servisofts-java-service version: 1.0.1");
         SConfig.validate();
+        SConsole.warning("servisofts-java-service version: 1.0.2");
         SSL.getKeyStore();
         SSL.defaultCert();
         ServiciosHabilitados.init();
