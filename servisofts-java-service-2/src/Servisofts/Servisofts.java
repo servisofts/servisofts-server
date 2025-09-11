@@ -20,7 +20,7 @@ public class Servisofts {
         // System.setProperty("xnio.spi.log", "ALL");
         SConsole.warning("Start Servisofts Java Service 2");
         SConfig.validate();
-        SConsole.warning("servisofts-java-service version: 1.0.2");
+        SConsole.warning("servisofts-java-service version: 1.0.3");
         SSL.getKeyStore();
         SSL.defaultCert();
         ServiciosHabilitados.init();
