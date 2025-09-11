@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Configuración
+FILE="$1"             
+FILENAME=$(basename "$FILE")                # archivo a subir (parámetro 1)
+CHUNK_SIZE=$((1024 * 1024))           # 1MB
+URL="https://drive.servisofts.com/http/uploadv2/serp/c9caa964-88f3-43db-88df-684ecf5c0a1b/repo/servisofts-java-service-2"   # URL de destino
+
+# Calcular total de chunks
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS / BSD
+  FILE_SIZE=$(stat -f%z "$FILE")
+else
+  # Linux (GNU coreutils)
+  FILE_SIZE=$(stat -c%s "$FILE")
+fi
+TOTAL_CHUNKS=$(( (FILE_SIZE + CHUNK_SIZE - 1) / CHUNK_SIZE ))
+
+echo "Subiendo archivo: $FILE"
+echo "Tamaño: $FILE_SIZE bytes"
+echo "Chunks: $TOTAL_CHUNKS"
+
+# Crear carpeta temporal para chunks
+TMP_DIR=$(mktemp -d)
+split -b $CHUNK_SIZE "$FILE" "$TMP_DIR/chunk_"
+
+CHUNK_NUMBER=0
+for CHUNK in "$TMP_DIR"/chunk_*; do
+    echo "Subiendo chunk $CHUNK_NUMBER / $((TOTAL_CHUNKS-1))..."
+
+    curl -s -X POST \
+        -H "Content-Type: application/octet-stream" \
+        --data-binary @"$CHUNK" \
+        "$URL/$FILENAME?chunkNumber=$CHUNK_NUMBER&totalChunks=$TOTAL_CHUNKS"
+
+    if [[ $? -ne 0 ]]; then
+        echo "Error subiendo chunk $CHUNK_NUMBER"
+        exit 1
+    fi
+
+    ((CHUNK_NUMBER++))
+done
+
+echo "✅ Upload completo"
+rm -rf "$TMP_DIR"
