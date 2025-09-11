@@ -699,6 +699,11 @@ public class SPGConect {
         return isLive;
     }
 
+    public static PreparedStatement preparedStatement(String query) throws SQLException {
+        Connection con = SPGConect.pool.getConnection();
+        return con.prepareStatement(query);
+    }
+
     // public static void desconectar() {
     // try {
     // if (con != null) {
