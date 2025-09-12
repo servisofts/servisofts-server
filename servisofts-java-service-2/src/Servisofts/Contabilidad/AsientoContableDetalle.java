@@ -16,6 +16,7 @@ public class AsientoContableDetalle {
             detalle.debe_me = json.optDouble("debe_me", 0);
             detalle.haber_me = json.optDouble("haber_me", 0);
         }
+        if(json.has("tags")) detalle.tags = json.optJSONObject("tags");
         return detalle;
     }
 
