@@ -8,14 +8,13 @@ public class AsientoContableDetalle {
     public static AsientoContableDetalle fromJSON(JSONObject json) {
         AsientoContableDetalle detalle = new AsientoContableDetalle(json.optString("key_cuenta_contable"),
                 json.optString("glosa"));
-        detalle.setDebe(json.optDouble("debe", 0));
-        detalle.setHaber(json.optDouble("haber", 0));
-        if(json.has("key_moneda")) {
-            detalle.key_moneda = json.optString("key_moneda");
-            detalle.tipo_cambio = json.optDouble("tipo_cambio", 1);
-            detalle.debe_me = json.optDouble("debe_me", 0);
-            detalle.haber_me = json.optDouble("haber_me", 0);
-        }
+
+        detalle.glosa = (json.optString("glosa", ""));
+        detalle.debe = (json.optDouble("debe", 0));
+        detalle.haber = (json.optDouble("haber", 0));
+        detalle.debe_me = json.optDouble("debe_me", 0);
+        detalle.haber_me = json.optDouble("haber_me", 0);
+        detalle.key_cuenta_contable = json.optString("key_cuenta_contable", "");
         if(json.has("tags")) detalle.tags = json.optJSONObject("tags");
         return detalle;
     }
@@ -35,25 +34,19 @@ public class AsientoContableDetalle {
         this.key_cuenta_contable = key_cuenta_contable;
     }
 
-    public AsientoContableDetalle(String key_cuenta_contable, String glosa, JSONObject tags) {
+
+    public AsientoContableDetalle(String key_cuenta_contable, String glosa, String tipo, double monto, double monto_me, JSONObject tags) {
         this.glosa = glosa;
         this.key_cuenta_contable = key_cuenta_contable;
         this.tags = tags;
-    }
-
-    public AsientoContableDetalle(String key_cuenta_contable, String glosa, String key_moneda, double tipo_cambio) {
-        this.glosa = glosa;
-        this.key_moneda = key_moneda;
-        this.key_cuenta_contable = key_cuenta_contable;
-        this.tipo_cambio = tipo_cambio;
-    }
-
-    public AsientoContableDetalle(String key_cuenta_contable, String glosa, String key_moneda, double tipo_cambio, JSONObject tags) {
-        this.glosa = glosa;
-        this.key_moneda = key_moneda;
-        this.key_cuenta_contable = key_cuenta_contable;
-        this.tipo_cambio = tipo_cambio;
-        this.tags = tags;
+        if (tipo.equals("debe")) {
+            this.debe = monto;
+            this.debe_me = monto_me;
+        } else {
+            this.haber = monto;
+            this.haber_me = monto_me;
+        }
+        
     }
 
     public AsientoContableDetalle setTags(JSONObject tags) {
@@ -61,21 +54,7 @@ public class AsientoContableDetalle {
         return this;
     }
 
-    public AsientoContableDetalle setDebe(double debe) {
-        this.debe = debe;
-        double debe_me_ = debe / tipo_cambio;
-        debe_me_ = Math.round(debe_me_ * 100.0) / 100.0;
-        if(tipo_cambio != 1) this.debe_me = debe_me_;
-        return this;
-    }
-
-    public AsientoContableDetalle setHaber(double haber) {
-        this.haber = haber;
-        double haber_me_ = haber / tipo_cambio;
-        haber_me_ = Math.round(haber_me_ * 100.0) / 100.0;
-        if(tipo_cambio != 1) this.haber_me = haber_me_;
-        return this;
-    }
+    
 
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
