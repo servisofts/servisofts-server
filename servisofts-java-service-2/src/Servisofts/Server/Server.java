@@ -13,6 +13,10 @@ public class Server extends Thread {
 
     private static Server INSTANCE = null;
 
+    public static int puerto = 0;
+    public static int puerto_ws = 0;
+    public static int puerto_http = 0;
+
     public static Server getInstance() {
         return INSTANCE;
     }
@@ -36,9 +40,19 @@ public class Server extends Thread {
         super.run();
         // SConsole.succes(this.servicio.getString("nombre"), "Server started");
 
-        new ServerSocket(this.servicio.getInt("puerto"));
-        new ServerSocketWeb(this.servicio.getInt("puerto_ws"));
-        ServerHttp.Start(this.servicio.getInt("puerto_http"));
+        if(this.servicio.has("puerto") && Server.puerto == 0){ 
+            Server.puerto = this.servicio.getInt("puerto");
+        }
+        if(this.servicio.has("puerto_ws") && Server.puerto_ws == 0){ 
+            Server.puerto_ws = this.servicio.getInt("puerto_ws");
+        }
+        if(this.servicio.has("puerto_http") && Server.puerto_http == 0){ 
+            Server.puerto_http = this.servicio.getInt("puerto_http");
+        }
+
+        new ServerSocket(Server.puerto);
+        new ServerSocketWeb(Server.puerto_ws);
+        ServerHttp.Start(Server.puerto_http);
         while (true) {
             try {
                 Thread.sleep(5000);

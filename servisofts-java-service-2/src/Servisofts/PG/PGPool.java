@@ -6,6 +6,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONObject;
 import org.postgresql.util.GT;
@@ -26,12 +30,48 @@ public class PGPool {
     public PGPool(PGConnectionProps conf) throws SQLException {
         SConsole.warning("Try to instance PGPool to db ",conf.bd_name, conf.ip);
         this.conf = conf;
+        createConnectionsInParallel();
+    }
+
+    private void createConnectionsInParallel() throws SQLException {
+        ExecutorService executor = Executors.newFixedThreadPool(min);
+        CountDownLatch latch = new CountDownLatch(min);
+        List<Exception> errors = new ArrayList<>();
+
         for (int i = 0; i < min; i++) {
-            createConnection();
+            final int index = i + 1;
+            executor.submit(() -> {
+                try {
+                    createConnection();
+                } catch (Exception e) {
+                    synchronized (errors) {
+                        errors.add(e);
+                    }
+                    SConsole.error("Error creating connection " + index + ": " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        try {
+            // Esperar a que todas las conexiones se creen (timeout de 30 segundos)
+            if (!latch.await(30, TimeUnit.SECONDS)) {
+                SConsole.error("Timeout waiting for connections to be created");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SQLException("Interrupted while creating connections", e);
+        } finally {
+            executor.shutdown();
+        }
+
+        if (!errors.isEmpty()) {
+            throw new SQLException("Failed to create some connections: " + errors.get(0).getMessage(), errors.get(0));
         }
     }
 
-    private Connection createConnection() throws SQLException {
+    private synchronized Connection createConnection() throws SQLException {
         Connection con = DriverManager.getConnection(
                 "jdbc:postgresql://" + conf.ip + ":" + conf.puerto + "/" + conf.bd_name,
                 conf.user,

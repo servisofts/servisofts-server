@@ -14,6 +14,9 @@ import Servisofts.http.annotation.RequestParam;
 
 // import Servisofts.mediator.Request;
 // import Servisofts.swagger.parts.Path;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -24,9 +27,14 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.jboss.com.sun.net.httpserver.HttpExchange;
 
 public class Action {
@@ -93,6 +101,13 @@ public class Action {
     if (this.type != ActionType.valueOf(method)) {
       return false;
     }
+    
+    // Soporte para wildcard /** que permite cualquier ruta después
+    if (this.route.endsWith("/**")) {
+      String baseRoute = this.route.substring(0, this.route.length() - 3);
+      return _route.startsWith(baseRoute) || _route.equals(baseRoute);
+    }
+    
     if (this.params.size() > 0) {
       String[] r_route = _route.split("/");
       String[] m_route = this.route.split("/");
@@ -122,9 +137,20 @@ public class Action {
       Response response,
       String path,
       String data,
+      byte[] bodyBytes,
       Object instance) throws HttpException {
     Parameter[] parameters = this.method.getParameters();
     Map<String, String> path_params = queryToMap(t.getRequestURI().getQuery());
+    Map<String, Object> multipart_params = null;
+    
+    // Detectar si es multipart/form-data
+    String contentType = t.getRequestHeaders().getFirst("Content-Type");
+    System.out.println("Content-Type: " + contentType);
+    if (contentType != null && contentType.toLowerCase().startsWith("multipart/form-data")) {
+      multipart_params = parseMultipartFormData(t, bodyBytes);
+      System.out.println("Multipart parsed successfully, params: " + (multipart_params != null ? multipart_params.keySet() : "null"));
+    }
+    
     // Class[] paramTypes = this.method.getParameterTypes();
     ArrayList<Object> values = new ArrayList<Object>();
     int i_p_v = -1;
@@ -167,16 +193,56 @@ public class Action {
         String name = anot.value();
         boolean required = anot.required();
 
-        if (path_params.containsKey(name)) {
-          values.add(parseValue(path_params.get(name), parameter.getType()));
-        } else {
-          if (required == true) {
+        System.out.println("Looking for RequestParam: " + name + " (required=" + required + ", type=" + parameter.getType().getSimpleName() + ")");
+
+        Object paramValue = null;
+        boolean found = false;
+
+        // Primero verificar en multipart si está disponible
+        if (multipart_params != null) {
+          System.out.println("  Checking in multipart_params...");
+          if (multipart_params.containsKey(name)) {
+            found = true;
+            Object multipartValue = multipart_params.get(name);
+            System.out.println("  Found in multipart: " + multipartValue);
+            
+            // Si el tipo esperado es MultipartFile o List<MultipartFile>
+            if (parameter.getType() == MultipartFile.class) {
+              if (multipartValue instanceof MultipartFile) {
+                paramValue = multipartValue;
+              } else if (multipartValue instanceof List) {
+                List<?> list = (List<?>) multipartValue;
+                if (!list.isEmpty()) {
+                  paramValue = list.get(0);
+                }
+              }
+            } else if (parameter.getType() == List.class) {
+              paramValue = multipartValue;
+            } else {
+              // Es un campo de texto normal en multipart
+              paramValue = parseValue(multipartValue, parameter.getType());
+            }
+          } else {
+            System.out.println("  NOT found in multipart_params");
+          }
+        } else if (path_params != null && path_params.containsKey(name)) {
+          // Si no es multipart, verificar query params
+          System.out.println("  Found in path_params");
+          found = true;
+          paramValue = parseValue(path_params.get(name), parameter.getType());
+        }
+
+        if (!found) {
+          System.out.println("  Parameter not found, required=" + required);
+          if (required) {
             throw new HttpException(Status.BAD_REQUEST,
                 "Parameter " + name + ":" + parameter.getType().getName() + " is required.");
           }
-          values.add(parseValue(null, parameter.getType()));
+          paramValue = parseValue(null, parameter.getType());
         }
 
+        System.out.println("  Final value: " + paramValue);
+        values.add(paramValue);
         continue;
       }
       // RequestHeader
@@ -249,6 +315,94 @@ public class Action {
     return result;
   }
 
+  private Map<String, Object> parseMultipartFormData(HttpExchange t, byte[] bodyBytes) throws HttpException {
+    Map<String, Object> result = new HashMap<>();
+    try {
+      System.out.println("Body bytes read: " + (bodyBytes != null ? bodyBytes.length : 0));
+      
+      DiskFileItemFactory factory = new DiskFileItemFactory();
+      ServletFileUpload upload = new ServletFileUpload(factory);
+      
+      List<FileItem> items = upload.parseRequest(new RequestContext() {
+        @Override
+        public String getCharacterEncoding() {
+          return "UTF-8";
+        }
+
+        @Override
+        public int getContentLength() {
+          return bodyBytes.length;
+        }
+
+        @Override
+        public String getContentType() {
+          return t.getRequestHeaders().getFirst("Content-Type");
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+          return new java.io.ByteArrayInputStream(bodyBytes);
+        }
+      });
+
+      System.out.println("Multipart items parsed: " + items.size());
+      
+      for (FileItem item : items) {
+        String fieldName = item.getFieldName();
+        System.out.println("Field: " + fieldName + ", isFormField: " + item.isFormField());
+        
+        if (item.isFormField()) {
+          // Es un campo de texto normal
+          String value = item.getString("UTF-8");
+          System.out.println("  -> Text value: " + value);
+          result.put(fieldName, value);
+        } else {
+          // Es un archivo
+          System.out.println("  -> File: " + item.getName() + ", size: " + item.getSize());
+          byte[] fileContent = readInputStream(item.getInputStream());
+          MultipartFile file = new MultipartFile(
+            fieldName,
+            item.getName(),
+            item.getContentType(),
+            fileContent
+          );
+          
+          // Si ya existe el campo, convertir a lista
+          if (result.containsKey(fieldName)) {
+            Object existing = result.get(fieldName);
+            if (existing instanceof List) {
+              ((List<MultipartFile>) existing).add(file);
+            } else {
+              List<MultipartFile> list = new ArrayList<>();
+              list.add((MultipartFile) existing);
+              list.add(file);
+              result.put(fieldName, list);
+            }
+          } else {
+            result.put(fieldName, file);
+          }
+        }
+      }
+      
+      System.out.println("Final multipart_params map keys: " + result.keySet());
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new HttpException(Status.BAD_REQUEST, "Error parsing multipart/form-data: " + e.getMessage());
+    }
+    return result;
+  }
+
+  private byte[] readInputStream(InputStream inputStream) throws IOException {
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    int read;
+    byte[] data = new byte[8192];
+    while ((read = inputStream.read(data, 0, data.length)) != -1) {
+      buffer.write(data, 0, read);
+    }
+    return buffer.toByteArray();
+  }
+
   public Object parseValue(Object value, Class<?> type) {
 
     if (type == String.class) {
@@ -277,18 +431,28 @@ public class Action {
       return Boolean.parseBoolean(value.toString());
     }
     if (type == Date.class) {
+      if (value == null)
+        return null;
       return new Date(Long.parseLong(value.toString()));
     }
     if (type == BigDecimal.class) {
+      if (value == null)
+        return null;
       return new BigDecimal(value.toString());
     }
     if (type == BigInteger.class) {
+      if (value == null)
+        return null;
       return new BigInteger(value.toString());
     }
     if (type == byte[].class) {
+      if (value == null)
+        return null;
       return value.toString().getBytes();
     }
     if (type == Byte.class) {
+      if (value == null)
+        return null;
       return Byte.parseByte(value.toString());
     }
     // Class[] i = type.getInterfaces();
@@ -298,6 +462,8 @@ public class Action {
     // }
     // }
     // return JSON.getInstance().fromJson(value.toString(), type);
+    if (value == null)
+      return null;
     return value.toString();
   }
 

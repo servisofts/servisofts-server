@@ -64,7 +64,7 @@ public class Controller {
         return route;
     }
 
-    public void onMessage(HttpExchange t, String data, Response response)
+    public void onMessage(HttpExchange t, String data, byte[] bodyBytes, Response response)
             throws HttpException {
         String path = t.getRequestURI().getPath();
         path = path.split("\\?")[0];
@@ -80,7 +80,7 @@ public class Controller {
                 Constructor<?> cos;
                 try {
                     cos = this.controller.getConstructor(new Class[] {});
-                    action.onMessage(t, response, path, data, cos.newInstance());
+                    action.onMessage(t, response, path, data, bodyBytes, cos.newInstance());
                 } catch (Exception e) {
                     if (e instanceof HttpException) {
                         HttpException ex = (HttpException) e;

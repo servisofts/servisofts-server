@@ -24,24 +24,24 @@ public abstract class SSServerAbstract implements SSServerInterface {
     // public static HashMap<String, String> DEVICES = new HashMap<>();
 
     // public static void setUserSession(String keyUser, String keyDevice) {
-    //     ArrayList<String> usuarios = USUARIOS.get(keyUser);
-    //     if (usuarios == null) {
-    //         usuarios = new ArrayList<>();
-    //     }
-    //     boolean exist = false;
-    //     for (String string : usuarios) {
-    //         if (string.equals(keyDevice)) {
-    //             exist = true;
-    //         }
-    //     }
-    //     if (!exist) {
-    //         usuarios.add(keyDevice);
-    //     }
-    //     USUARIOS.put(keyUser, usuarios);
+    // ArrayList<String> usuarios = USUARIOS.get(keyUser);
+    // if (usuarios == null) {
+    // usuarios = new ArrayList<>();
+    // }
+    // boolean exist = false;
+    // for (String string : usuarios) {
+    // if (string.equals(keyDevice)) {
+    // exist = true;
+    // }
+    // }
+    // if (!exist) {
+    // usuarios.add(keyDevice);
+    // }
+    // USUARIOS.put(keyUser, usuarios);
     // }
 
     // public static void setDeviceSession(String keyDevice, String KeySession) {
-    //     DEVICES.put(keyDevice, KeySession);
+    // DEVICES.put(keyDevice, KeySession);
     // }
 
     public static void closeSession(String key_session) {
@@ -56,11 +56,11 @@ public abstract class SSServerAbstract implements SSServerInterface {
                     // DEVICES.remove(sesion.getKeyDevice());
                     // ArrayList<String> devicesUser = USUARIOS.get(sesion.getKeyUsuario());
                     // if (devicesUser != null) {
-                    //     for (String keyDevice : devicesUser) {
-                    //         if (keyDevice.equals(sesion.getKeyDevice())) {
-                    //             devicesUser.remove(keyDevice);
-                    //         }
-                    //     }
+                    // for (String keyDevice : devicesUser) {
+                    // if (keyDevice.equals(sesion.getKeyDevice())) {
+                    // devicesUser.remove(keyDevice);
+                    // }
+                    // }
                     // }
 
                 }
@@ -78,18 +78,18 @@ public abstract class SSServerAbstract implements SSServerInterface {
             // SConsole.warning("Close closeSession");
             SSServerAbstract server = SERVIDORES.get(type);
             // if (server.getSessiones().get(key_session) != null) {
-                // SSSessionAbstract sesion = server.getSessiones().get(key_session);
-                server.sessiones.remove(key_session);
-                SConsole.warning(key_session + "\t|\t" + "Session close on the '" + server.getTipoServer());
-                // DEVICES.remove(sesion.getKeyDevice());
-                // ArrayList<String> devicesUser = USUARIOS.get(sesion.getKeyUsuario());
-                // if (devicesUser != null) {
-                //     for (String keyDevice : devicesUser) {
-                //         if (keyDevice.equals(sesion.getKeyDevice())) {
-                //             devicesUser.remove(keyDevice);
-                //         }
-                //     }
-                // }
+            // SSSessionAbstract sesion = server.getSessiones().get(key_session);
+            server.sessiones.remove(key_session);
+            SConsole.warning(key_session + "\t|\t" + "Session close on the '" + server.getTipoServer());
+            // DEVICES.remove(sesion.getKeyDevice());
+            // ArrayList<String> devicesUser = USUARIOS.get(sesion.getKeyUsuario());
+            // if (devicesUser != null) {
+            // for (String keyDevice : devicesUser) {
+            // if (keyDevice.equals(sesion.getKeyDevice())) {
+            // devicesUser.remove(keyDevice);
+            // }
+            // }
+            // }
 
             // }
             // SConsole.warning("Close closeSession fin");
@@ -106,6 +106,9 @@ public abstract class SSServerAbstract implements SSServerInterface {
             return null;
         }
         return servidor;
+    }
+      public static ConcurrentHashMap<String, SSServerAbstract> getServidores() {
+        return SERVIDORES;
     }
 
     public static SSSessionAbstract getSessionByNombreServicio(String nombre) {
@@ -302,4 +305,7 @@ public abstract class SSServerAbstract implements SSServerInterface {
 
         }
     }
+
+  
+
 }

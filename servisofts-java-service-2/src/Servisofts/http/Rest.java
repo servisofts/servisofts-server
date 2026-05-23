@@ -72,21 +72,24 @@ public abstract class Rest {
         }
         Response response = new Response();
 
-        StringBuilder sb = new StringBuilder();
+        // Leer el body como bytes primero
+        byte[] bodyBytes = null;
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(t.getRequestBody(), "UTF-8"));
-            // InputStream ios = t.getRequestBody();
-            String i;
-            while ((i = bufferedReader.readLine()) != null) {
-                sb.append(i+"\n");
-            }
+            bodyBytes = readInputStream(t.getRequestBody());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            String data = sb.toString();
+        String data = "";
+        if (bodyBytes != null && bodyBytes.length > 0) {
+            data = new String(bodyBytes, "UTF-8");
+        }
 
+        try {
             t.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
 
             
-            onMessage(t, data, response);
+            onMessage(t, data, bodyBytes, response);
             ByteBuffer buffer = Charset.forName("UTF-8").encode(response.toString());
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
@@ -106,6 +109,7 @@ public abstract class Rest {
     private static void onMessage(
             HttpExchange t,
             String data,
+            byte[] bodyBytes,
             Response response) {
         String url = t.getRequestURI().toString();
         url = url.split("\\?")[0];
@@ -129,7 +133,7 @@ public abstract class Rest {
             return;
         }
         try {
-            controller.onMessage(t, data, response);
+            controller.onMessage(t, data, bodyBytes, response);
         } catch (HttpException e) {
 
             if (e instanceof HttpException) {
@@ -170,4 +174,14 @@ public abstract class Rest {
     // }
     // // return doc.toJSON().toString();
     // }
+
+    private static byte[] readInputStream(InputStream inputStream) throws IOException {
+        java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+        int read;
+        byte[] data = new byte[8192];
+        while ((read = inputStream.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, read);
+        }
+        return buffer.toByteArray();
+    }
 }

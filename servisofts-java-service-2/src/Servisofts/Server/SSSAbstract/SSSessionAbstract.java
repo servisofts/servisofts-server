@@ -2,6 +2,7 @@ package Servisofts.Server.SSSAbstract;
 
 import java.security.cert.X509Certificate;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import Servisofts.Server.SSSInterface.SSSessionInterface;
@@ -17,6 +18,7 @@ public abstract class SSSessionAbstract implements SSSessionInterface {
     private int timeZone = 0;
     private String keyDevice;
 
+    public JSONArray listeners;
     private JSONObject usuario;
     private JSONObject servicio;
     private SSServerAbstract Server;
